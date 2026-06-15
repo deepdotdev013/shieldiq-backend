@@ -1,0 +1,44 @@
+{
+  "name": "shieldiq-backend",
+  "type": "commonjs",
+  "version": "1.0.0",
+  "description": "🚀 A Node.js backend service built with Express, generated using Repo Beaver.",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "author": "",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.1",
+    "axios": "^1.17.0",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.2",
+    "connect-session-sequelize": "^8.0.6",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "express-session": "^1.19.0",
+    "handlebars": "^4.7.9",
+    "i18n": "^0.15.3",
+    "jsonwebtoken": "^9.0.3",
+    "moment": "^2.30.1",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.11",
+    "pg": "^8.21.0",
+    "redis": "^6.0.0",
+    "sequelize": "^6.37.8",
+    "uuid": "^14.0.0",
+    "validatorjs": "^3.22.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

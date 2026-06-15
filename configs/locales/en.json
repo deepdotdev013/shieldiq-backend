@@ -1,0 +1,19 @@
+{
+  "VALIDATION_ERROR": "Validation failed. Please check your input and try again",
+  "WENTS_WRONG": "Something went wrong. Please try again later.",
+  "USER_NOT_FOUND": "User not found",
+  "USER_SIGNUP_SUCCESS": "A verification email has been sent to your email address. Please check your inbox.",
+  "EMAIL_ALREADY_REGISTERED": " This email address is already registered. Please use a different email.",
+  "USERNAME_ALREADY_EXISTS": "This username is already taken. Please try a different one.",
+  "PASSWORD_MISMATCH": "Password and Confirm Password must be the same. Please double-check and try again.",
+  "TOKEN_GENERATION_ERROR": "Error generating token. Please try again later.",
+  "VERIFY_EMAIL_TITLE": "Verify Your Email - ShieldIQ Account Activation 🚀",
+  "INVALID_TOKEN": "The verification link is invalid or has expired. Please request a new one.",
+  "EMAIL_ALREADY_VERIFIED": "Your email is already verified. You can log in now.",
+  "EMAIL_VERIFY_SUCCESS": "Your email has been successfully verified.",
+  "EMAIL_NOT_VERIFIED": "Your email is not verified. Please verify your email to proceed.",
+  "INCORRECT_CREDS": "Incorrect Email or Password.",
+  "LOGIN_SUCCESS": "Login successful! Let's get started.",
+  "AUTHORIZATION_TOKEN_REQUIRED": "Authorization token is missing. Please provide a valid token to proceed.",
+  "INVALID_AUTHORIZATION_TOKEN": "Invalid authorization token. Please provide a valid token or reauthenticate."
+}

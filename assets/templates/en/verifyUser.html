@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Verify Your Email - ShieldIQ</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7fa;font-family:Arial,Helvetica,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f7fa;padding:40px 0;">
+    <tr>
+      <td align="center">
+
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background:#0f172a;padding:30px;">
+              <h1 style="color:#ffffff;margin:0;font-size:28px;">
+                ShieldIQ
+              </h1>
+              <p style="color:#cbd5e1;margin-top:8px;">
+                Cybersecurity Awareness & Training Platform
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px;">
+
+              <h2 style="margin-top:0;color:#111827;">
+                Verify Your Email Address
+              </h2>
+
+              <p style="color:#4b5563;font-size:16px;line-height:26px;">
+                Hi <strong>{{fullName}}</strong>,
+              </p>
+
+              <p style="color:#4b5563;font-size:16px;line-height:26px;">
+                Welcome to <strong>ShieldIQ</strong>.
+                To activate your account and begin improving your cybersecurity awareness,
+                please verify your email address by clicking the button below.
+              </p>
+
+              <div style="text-align:center;margin:35px 0;">
+                <a
+                  href="{{verificationLink}}"
+                  style="
+                    background:#2563eb;
+                    color:#ffffff;
+                    text-decoration:none;
+                    padding:14px 32px;
+                    border-radius:8px;
+                    display:inline-block;
+                    font-weight:bold;
+                    font-size:16px;
+                  "
+                >
+                  Verify Email
+                </a>
+              </div>
+
+              <p style="color:#4b5563;font-size:15px;line-height:24px;">
+                If the button does not work, copy and paste the following URL into your browser:
+              </p>
+
+              <p style="word-break:break-all;color:#2563eb;">
+                {{verificationLink}}
+              </p>
+
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:30px 0;">
+
+              <div style="
+                background:#f8fafc;
+                border-left:4px solid #2563eb;
+                padding:15px;
+                border-radius:4px;
+              ">
+                <strong>Security Tip</strong>
+                <p style="margin:8px 0 0;color:#4b5563;font-size:14px;line-height:22px;">
+                  ShieldIQ will never ask you for your password via email.
+                  Always verify the sender and links before interacting with any email.
+                </p>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f8fafc;padding:25px;text-align:center;">
+
+              <p style="margin:0;color:#6b7280;font-size:14px;">
+                This verification link will expire in 24 hours.
+              </p>
+
+              <p style="margin-top:15px;color:#6b7280;font-size:13px;">
+                Need help? Contact us at
+                <a href="mailto:{{supportEmail}}" style="color:#2563eb;">
+                  {{supportEmail}}
+                </a>
+              </p>
+
+              <p style="margin-top:20px;color:#9ca3af;font-size:12px;">
+                © {{year}} ShieldIQ. All Rights Reserved.
+              </p>
+
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
