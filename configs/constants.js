@@ -33,12 +33,14 @@ const VALIDATION_EVENTS = {
   VerifyUserEmail: "verifyUserEmail",
   SignInUserEmail: "signInUserEmail",
   ForgetPassword: "forgetPassword",
+  RefreshToken: "refreshToken",
 };
 
 // JWT Types
 const JWT_TYPE = {
   VerifyEmail: "verifyEmail",
   LoginUser: "loginUser",
+  RefreshToken: "refreshToken",
 };
 
 // JWT Expires

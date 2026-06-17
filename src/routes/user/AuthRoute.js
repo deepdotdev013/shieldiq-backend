@@ -14,6 +14,7 @@ const AuthController = require("../../controllers/user/AuthController");
 ROUTER.post("/signup", AuthController.signUpUserEmail)
   .post("/verify-email", AuthController.verifyUserEmail)
   .post("/signin", AuthController.signInUserEmail)
+  .post("/refresh-token", AuthController.refreshToken)
   .get("/me", [CheckUserAuth], AuthController.getUserDetails)
   .post("/logout", [CheckUserAuth], AuthController.logoutUser)
   .post("/forget-password", AuthController.forgetPassword)

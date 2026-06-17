@@ -1,6 +1,6 @@
-const { User } = require('../models');
+const { User } = require("../models");
 const { JWT, JWT_EXPIRY, JWT_TYPE } =
-  require('../../configs/constants').constants;
+  require("../../configs/constants").constants;
 
 // Generate a token
 const generateToken = async (tokenData, expiresIn = JWT_EXPIRY.Access) => {
@@ -17,7 +17,7 @@ const generateToken = async (tokenData, expiresIn = JWT_EXPIRY.Access) => {
       data: token,
     };
   } catch (error) {
-    console.log('generateToken error: ', error);
+    console.log("generateToken error: ", error);
     // Send the error when catch fires.
     return {
       hasError: true,
@@ -37,20 +37,31 @@ const verifyToken = async (token, type) => {
     if (decodedTokenData.exp < Date.now() / 1000) {
       return {
         hasError: true,
-        message: 'Token Expired',
-        error: 'Token Expired',
+        message: "Token Expired",
+        error: "Token Expired",
         data: null,
       };
     }
 
     // Create a dynamic where condition.
-    let where = {};
+    let where = {
+      isDeleted: false,
+    };
 
     // Check the JWT type with the incoming type
     if (type === JWT_TYPE.VerifyEmail) {
       where.verificationToken = token;
     } else if (type === JWT_TYPE.LoginUser) {
       where.accessToken = token;
+    } else if (type === JWT_TYPE.RefreshToken) {
+      where.id = decodedTokenData.id;
+    } else {
+      return {
+        hasError: true,
+        message: "Invalid JWT Type",
+        error: "Invalid JWT Type",
+        data: null,
+      };
     }
 
     // Find the user with the where condition.
@@ -63,8 +74,8 @@ const verifyToken = async (token, type) => {
     if (!user) {
       return {
         hasError: true,
-        message: 'User Not Found',
-        error: 'User Not Found',
+        message: "User Not Found",
+        error: "User Not Found",
         data: null,
       };
     }
@@ -72,7 +83,7 @@ const verifyToken = async (token, type) => {
     // Success Response.
     return {
       hasError: false,
-      message: 'Token Verified Successfully',
+      message: "Token Verified Successfully",
       error: null,
       data: user,
     };

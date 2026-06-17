@@ -778,4 +778,146 @@ module.exports = {
       });
     }
   },
+
+  /**
+   * @name refreshToken
+   * @path /user/refresh-token
+   * @method POST
+   * @description This method is used to refresh the user's access token.
+   * @returns {Object} JSON object containing the user data
+   * @author Deep Panchal
+   */
+  refreshToken: async (req, res) => {
+    try {
+      const bodyData = {
+        accessToken: req.body.accessToken,
+        refreshToken: req.body.refreshToken,
+        eventCode: VALIDATION_EVENTS.RefreshToken,
+      };
+
+      // Validate the incoming data
+      const result = validateUserData(bodyData);
+
+      // If the validation fails, send an error
+      if (result.hasError) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("VALIDATION_ERROR"),
+          error: result.errors,
+        });
+      }
+
+      // 1. Verify Refresh Token
+      const verifiedToken = await verifyToken(
+        bodyData.refreshToken,
+        JWT_TYPE.RefreshToken,
+      );
+      if (verifiedToken.hasError) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("INVALID_REFRESH_TOKEN"),
+          error: verifiedToken.error,
+        });
+      }
+
+      const user = verifiedToken.data;
+
+      // 2. Check User Exists (And is active/not deleted)
+      if (!user || user.isDeleted) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("USER_NOT_FOUND"),
+          data: null,
+        });
+      }
+
+      if (!user.isActive) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("USER_NOT_ACTIVE"),
+          data: null,
+        });
+      }
+
+      // 3. Compare Refresh Token with DB
+      if (user.refreshToken !== bodyData.refreshToken) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("INVALID_REFRESH_TOKEN"),
+          data: null,
+        });
+      }
+
+      // 4. Generate New Access Token
+      const accessTokenResult = await generateToken(
+        {
+          id: user.id,
+          email: user.email,
+          type: JWT_TYPE.LoginUser,
+        },
+        JWT_EXPIRY.Access,
+      );
+
+      if (accessTokenResult.hasError) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("TOKEN_GENERATION_ERROR"),
+          error: accessTokenResult.error,
+        });
+      }
+
+      // 5. Generate New Refresh Token (Token Rotation)
+      const refreshTokenResult = await generateToken(
+        {
+          id: user.id,
+          email: user.email,
+          type: JWT_TYPE.LoginUser,
+        },
+        JWT_EXPIRY.Refresh,
+      );
+
+      if (refreshTokenResult.hasError) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("TOKEN_GENERATION_ERROR"),
+          error: refreshTokenResult.error,
+        });
+      }
+
+      const newAccessToken = accessTokenResult.data;
+      const newRefreshToken = refreshTokenResult.data;
+
+      // 6. Update DB
+      await User.update(
+        {
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+          updatedAt: Date.now(),
+          updatedBy: user.id,
+        },
+        {
+          where: {
+            id: user.id,
+          },
+        },
+      );
+
+      // 7. Return New Tokens
+      return res.status(RESPONSE_CODES.Ok).json({
+        status: RESPONSE_CODES.Ok,
+        message: req.__("REFRESH_TOKEN_SUCCESS"),
+        data: {
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        },
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      return res.status(RESPONSE_CODES.ServerError).json({
+        status: RESPONSE_CODES.ServerError,
+        message: req.__("WENTS_WRONG"),
+        data: null,
+      });
+    }
+  },
 };

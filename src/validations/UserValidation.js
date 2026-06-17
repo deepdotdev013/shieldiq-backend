@@ -83,6 +83,15 @@ const validateUserData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.RefreshToken: {
+      // Define the rules
+      rules = {
+        accessToken: "string|required",
+        refreshToken: "string|required",
+      };
+      break;
+    }
+
     default:
       break;
   }

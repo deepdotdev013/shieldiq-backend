@@ -21,5 +21,9 @@
   "FORGET_PASSWORD_LINK_SENT_SUCCESSFULLY": "A password reset link has been sent to your email address. Please check your inbox.",
   "INVALID_FORGOT_PASSWORD_TOKEN": "The forgot password link is invalid or has expired. Please request a new one.",
   "OLD_PASSWORD_NOT_ALLOWED": "You cannot use the same password as your old password. Please choose a different password.",
-  "PASSWORD_RESET_SUCCESS": "Your password has been reset successfully. You can now log in with your new password."
+  "PASSWORD_RESET_SUCCESS": "Your password has been reset successfully. You can now log in with your new password.",
+  "INVALID_ACCESS_TOKEN": "Invalid access token. Please provide a valid token or reauthenticate.",
+  "ACCESS_TOKEN_EXPIRED": "Access token is expired. Please provide a valid token or reauthenticate.",
+  "REFRESH_TOKEN_SUCCESS": "Access token and refresh token have been refreshed successfully.",
+  "INVALID_REFRESH_TOKEN": "Invalid refresh token. Please login again."
 }
