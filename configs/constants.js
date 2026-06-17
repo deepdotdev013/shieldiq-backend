@@ -84,6 +84,12 @@ const DEPARTMENT = {
   EXECUTIVE: "executive",
 };
 
+// Roles for authentication
+const ROLES = {
+  ADMIN: "admin",
+  USER: "user",
+};
+
 // Export the constants
 module.exports.constants = {
   defaultAttributes,
@@ -108,5 +114,6 @@ module.exports.constants = {
   FILE_TYPES,
   MOMENT,
   DEPARTMENT,
+  ROLES,
   Op,
 };

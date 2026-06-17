@@ -8,12 +8,12 @@ const {
   EMAIL_EVENTS,
   JWT_EXPIRY,
   Op,
+  ROLES,
 } = require("../../../configs/constants").constants;
 const { validateUserData } = require("../../validations/UserValidation");
 const { User, sequelize } = require("../../models");
 const { generateToken, verifyToken } = require("../../utils/tokenUtils");
 const { sendMail } = require("../../helpers/sendMail");
-const { checkUpdatedData } = require("../../helpers/checkUpdatedData");
 
 module.exports = {
   /**
@@ -86,6 +86,7 @@ module.exports = {
       const generateVerificationToken = await generateToken({
         id: bodyData.id,
         email: bodyData.email,
+        role: ROLES.User,
         type: JWT_TYPE.VerifyEmail,
       });
 
@@ -328,6 +329,7 @@ module.exports = {
         {
           id: isExistingUser.id,
           email: isExistingUser.email,
+          role: isExistingUser.role,
           type: JWT_TYPE.LoginUser,
         },
         JWT_EXPIRY.Access,
@@ -347,6 +349,7 @@ module.exports = {
         {
           id: isExistingUser.id,
           email: isExistingUser.email,
+          role: isExistingUser.role,
           type: JWT_TYPE.LoginUser,
         },
         JWT_EXPIRY.Refresh,
@@ -384,10 +387,10 @@ module.exports = {
         data: {
           id: isExistingUser.id,
           email: isExistingUser.email,
-          username: isExistingUser.username,
+          fullName: isExistingUser.fullName,
+          role: isExistingUser.role,
           accessToken: accessToken.data,
           refreshToken: refreshToken.data,
-          stepComplete: isExistingUser.stepComplete,
         },
       });
     } catch (error) {
@@ -418,6 +421,7 @@ module.exports = {
         	U."fullName",
         	U."email",
         	U."department",
+          U."role",
         	U."accessToken",
         	U."refreshToken",
         	U."isEmailVerified",
@@ -853,6 +857,7 @@ module.exports = {
         {
           id: user.id,
           email: user.email,
+          role: user.role,
           type: JWT_TYPE.LoginUser,
         },
         JWT_EXPIRY.Access,
@@ -871,7 +876,8 @@ module.exports = {
         {
           id: user.id,
           email: user.email,
-          type: JWT_TYPE.LoginUser,
+          role: user.role,
+          type: JWT_TYPE.RefreshToken,
         },
         JWT_EXPIRY.Refresh,
       );

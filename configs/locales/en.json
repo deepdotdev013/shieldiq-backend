@@ -25,5 +25,6 @@
   "INVALID_ACCESS_TOKEN": "Invalid access token. Please provide a valid token or reauthenticate.",
   "ACCESS_TOKEN_EXPIRED": "Access token is expired. Please provide a valid token or reauthenticate.",
   "REFRESH_TOKEN_SUCCESS": "Access token and refresh token have been refreshed successfully.",
-  "INVALID_REFRESH_TOKEN": "Invalid refresh token. Please login again."
+  "INVALID_REFRESH_TOKEN": "Invalid refresh token. Please login again.",
+  "UNAUTHORIZED_ACCESS": "You do not have permission to access this resource."
 }
