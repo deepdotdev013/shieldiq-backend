@@ -7,6 +7,7 @@ const {
   JWT_TYPE,
   EMAIL_EVENTS,
   JWT_EXPIRY,
+  Op,
 } = require("../../../configs/constants").constants;
 const { validateUserData } = require("../../validations/UserValidation");
 const { User, sequelize } = require("../../models");
@@ -298,6 +299,15 @@ module.exports = {
         });
       }
 
+      // Check if the user is active.
+      if (!isExistingUser.isActive) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("USER_NOT_ACTIVE"),
+          data: null,
+        });
+      }
+
       // Match the incoming password with the user's saved password.
       const isPasswordMatch = await BCRYPT.compare(
         bodyData.password,
@@ -473,6 +483,291 @@ module.exports = {
         status: RESPONSE_CODES.Ok,
         message: req.__("SERVER_AWAKE"),
         data: user?.[0].dataValues.role,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      return res.status(RESPONSE_CODES.ServerError).json({
+        status: RESPONSE_CODES.ServerError,
+        message: req.__("WENTS_WRONG"),
+        data: null,
+      });
+    }
+  },
+
+  /**
+   * @name logoutUser
+   * @path /user/logout
+   * @method POST
+   * @schema User
+   * @description This method is used to logout the user.
+   * @returns {Object} JSON object containing the user data
+   * @author Deep Panchal
+   */
+  logoutUser: async (req, res) => {
+    try {
+      // Find the user to logout.
+      const user = await User.findOne({
+        where: {
+          id: req.user.id,
+          isEmailVerified: true,
+          isActive: true,
+          isDeleted: false,
+          [Op.and]: [
+            {
+              accessToken: {
+                [Op.ne]: null,
+              },
+            },
+            {
+              refreshToken: {
+                [Op.ne]: null,
+              },
+            },
+          ],
+        },
+      });
+      if (!user) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("USER_NOT_FOUND"),
+          data: null,
+        });
+      }
+
+      // Logout the user by removing the access token and refresh token.
+      await User.update(
+        {
+          accessToken: null,
+          refreshToken: null,
+          updatedAt: Date.now(),
+          updatedBy: req.user.id,
+        },
+        {
+          where: {
+            id: user.id,
+          },
+        },
+      );
+
+      // Send the success response.
+      return res.status(RESPONSE_CODES.Ok).json({
+        status: RESPONSE_CODES.Ok,
+        message: req.__("LOGOUT_SUCCESS"),
+        data: null,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      return res.status(RESPONSE_CODES.ServerError).json({
+        status: RESPONSE_CODES.ServerError,
+        message: req.__("WENTS_WRONG"),
+        data: null,
+      });
+    }
+  },
+
+  /**
+   * @name forgetPassword
+   * @path /user/forget-password
+   * @method POST
+   * @schema User
+   * @description This method is used to generate a forget password token and send an email to the user.
+   * @returns {Object} JSON object containing the user data
+   * @author Deep Panchal
+   */
+  forgetPassword: async (req, res) => {
+    try {
+      // Create the bodyData
+      const bodyData = {
+        email: req.body.email && req.body.email.trim().toLowerCase(),
+        eventCode: VALIDATION_EVENTS.ForgetPassword,
+      };
+
+      // Validate the incoming data
+      const result = validateUserData(bodyData);
+
+      // If the validation fails, send an error
+      if (result.hasError) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("VALIDATION_ERROR"),
+          error: result.errors,
+        });
+      }
+
+      // Check if the user exists.
+      const isExistingUser = await User.findOne({
+        where: {
+          email: bodyData.email,
+          isDeleted: false,
+        },
+      });
+      if (!isExistingUser) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("USER_NOT_FOUND"),
+          data: null,
+        });
+      }
+
+      // Check if the email is not verified.
+      if (!isExistingUser.isEmailVerified) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("EMAIL_NOT_VERIFIED"),
+          data: null,
+        });
+      }
+
+      // Check if the user is active.
+      if (!isExistingUser.isActive) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("USER_NOT_ACTIVE"),
+          data: null,
+        });
+      }
+
+      // Generate forget password token
+      const forgetPasswordToken = UUID.v4();
+
+      // Update the user's forget password token and set the forget password timestamp.
+      await User.update(
+        {
+          forgotPasswordAt: Date.now(),
+          forgotPasswordToken: forgetPasswordToken,
+          updatedAt: Date.now(),
+          updatedBy: isExistingUser.id,
+        },
+        {
+          where: {
+            id: isExistingUser.id,
+          },
+        },
+      );
+
+      // Create the input params.
+      const inputs = {
+        subType: EMAIL_EVENTS.ForgetPassword,
+        payload: {
+          lang: "en",
+          name: isExistingUser.fullName || "User",
+          toUser: isExistingUser.email,
+          MailSubject: req.__("FORGET_PASSWORD_TITLE"),
+          link: `${process.env.FRONTEND_URL}/reset-password?token=${forgetPasswordToken}`,
+          supportEmail: process.env.SMTP_SENDER,
+          websiteLink: process.env.WEBSITE_URL || "www.google.com",
+        },
+      };
+
+      // Send the email
+      await sendMail(inputs);
+
+      // Success Response
+      return res.status(RESPONSE_CODES.Created).json({
+        status: RESPONSE_CODES.Created,
+        message: req.__("FORGET_PASSWORD_LINK_SENT_SUCCESSFULLY"),
+        data: null,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      return res.status(RESPONSE_CODES.ServerError).json({
+        status: RESPONSE_CODES.ServerError,
+        message: req.__("WENTS_WRONG"),
+        data: null,
+      });
+    }
+  },
+
+  /**
+   * @name resetPassword
+   * @path /user/reset-password
+   * @method POST
+   * @schema User
+   * @description This method is used to reset the user's password.
+   * @returns {Object} JSON object containing the user data
+   * @author Deep Panchal
+   */
+  resetPassword: async (req, res) => {
+    try {
+      const bodyData = {
+        token: req.body.token && req.body.token.trim(),
+        password: req.body.password && req.body.password.trim(),
+        eventCode: VALIDATION_EVENTS.ResetPassword,
+      };
+
+      // Validate the incoming data
+      const result = validateUserData(bodyData);
+
+      // If the validation fails, send an error
+      if (result.hasError) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("VALIDATION_ERROR"),
+          error: result.errors,
+        });
+      }
+
+      // Check if the forget password token is valid.
+      const user = await User.findOne({
+        where: {
+          forgotPasswordToken: bodyData.token,
+          isDeleted: false,
+        },
+      });
+      if (!user) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("INVALID_FORGOT_PASSWORD_TOKEN"),
+          data: null,
+        });
+      }
+
+      // Check if the forget password token is expired.
+      if (user.forgotPasswordAt < Date.now() - 15 * 60 * 1000) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("FORGOT_PASSWORD_TOKEN_EXPIRED"),
+          data: null,
+        });
+      }
+
+      // Check if the password is the same as the old password.
+      const isOldPassword = await BCRYPT.compare(
+        bodyData.password,
+        user.password,
+      );
+      if (isOldPassword) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("OLD_PASSWORD_NOT_ALLOWED"),
+          data: null,
+        });
+      }
+
+      // Hash the user's new password
+      const newHashedPassword = await BCRYPT.hash(bodyData.password, 10);
+
+      // Update the user's password and clear the forget password token.
+      await User.update(
+        {
+          password: newHashedPassword,
+          forgotPasswordToken: null,
+          forgotPasswordAt: null,
+          updatedAt: Date.now(),
+          updatedBy: user.id,
+        },
+        {
+          where: {
+            id: user.id,
+          },
+        },
+      );
+
+      // Success Response
+      return res.status(RESPONSE_CODES.Ok).json({
+        status: RESPONSE_CODES.Ok,
+        message: req.__("PASSWORD_RESET_SUCCESS"),
+        data: null,
       });
     } catch (error) {
       console.log("error: ", error);

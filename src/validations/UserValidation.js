@@ -62,6 +62,27 @@ const validateUserData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.ForgetPassword: {
+      // Define the rules
+      rules = {
+        email: "email|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.ResetPassword: {
+      // Define the rules
+      rules = {
+        token: "string|required",
+        password: [
+          "string",
+          "required",
+          "regex:/^(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,}$/",
+        ],
+      };
+      break;
+    }
+
     default:
       break;
   }

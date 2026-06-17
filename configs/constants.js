@@ -10,6 +10,7 @@ const AXIOS = require("axios");
 const MULTER = require("multer");
 const MOMENT = require("moment");
 const { createClient } = require("@supabase/supabase-js");
+const { Op } = require("sequelize");
 
 // Salt rounds for bcrypt
 const SALT_ROUNDS = 10;
@@ -31,8 +32,8 @@ const VALIDATION_EVENTS = {
   SignUpUserEmail: "signUpUserEmail",
   VerifyUserEmail: "verifyUserEmail",
   SignInUserEmail: "signInUserEmail",
+  ForgetPassword: "forgetPassword",
 };
-
 
 // JWT Types
 const JWT_TYPE = {
@@ -50,6 +51,8 @@ const JWT_EXPIRY = {
 const EMAIL_EVENTS = {
   VerifyUser: "verifyUser",
   LoginUser: "loginUser",
+  ForgetPassword: "forgetPassword",
+  ResetPassword: "resetPassword",
 };
 
 // Allowed files types for upload
@@ -102,5 +105,6 @@ module.exports.constants = {
   BUCKET_NAME,
   FILE_TYPES,
   MOMENT,
-  DEPARTMENT
+  DEPARTMENT,
+  Op,
 };
