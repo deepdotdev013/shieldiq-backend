@@ -86,8 +86,8 @@ const DEPARTMENT = {
 
 // Roles for authentication
 const ROLES = {
-  ADMIN: "admin",
-  USER: "user",
+  Admin: "admin",
+  User: "user",
 };
 
 // Export the constants
