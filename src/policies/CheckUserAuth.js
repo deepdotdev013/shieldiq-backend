@@ -34,15 +34,6 @@ module.exports.CheckUserAuth = async (req, res, next) => {
       });
     }
 
-    // Check if the user is authorized to access the resource.
-    if (decodedUser.data.role !== ROLES.User) {
-      return res.status(RESPONSE_CODES.Unauthorized).json({
-        status: RESPONSE_CODES.Unauthorized,
-        message: req.__("UNAUTHORIZED_ACCESS"),
-        data: null,
-      });
-    }
-
     // Send the decoded user data in the req.user object.
     req.user = decodedUser.data;
 

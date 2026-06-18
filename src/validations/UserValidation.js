@@ -92,6 +92,19 @@ const validateUserData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.GetAllUsers: {
+      // Define the rules
+      rules = {
+        search: "string",
+        department: "string",
+        limit: "integer|required",
+        skip: "integer|required",
+        sort: "string|required",
+        sortOrder: "string|required",
+      };
+      break;
+    }
+
     default:
       break;
   }
