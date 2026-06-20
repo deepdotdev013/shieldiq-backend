@@ -14,7 +14,8 @@ const UserController = require("../../controllers/admin/UserController");
 ROUTER.get("/users", [CheckAdminAuth], UserController.getAllUsers)
   .get("/users/:id", [CheckAdminAuth], UserController.getSingleUserDetails)
   .patch("/users/:id", [CheckAdminAuth], UserController.updateSingleUser)
-  .post("/users/:id", [CheckAdminAuth], UserController.deleteSingleUser);
+  .post("/users/:id", [CheckAdminAuth], UserController.deleteSingleUser)
+  .post("/users", [CheckAdminAuth], UserController.createSingleUser);
 
 // Export the router
 module.exports = ROUTER;

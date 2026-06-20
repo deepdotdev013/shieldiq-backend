@@ -38,6 +38,7 @@ const VALIDATION_EVENTS = {
   GetSingleUserDetails: "getSingleUserDetails",
   UpdateSingleUser: "updateSingleUser",
   DeleteSingleUser: "deleteSingleUser",
+  CreateSingleUser: "createSingleUser",
 };
 
 // JWT Types
@@ -59,6 +60,7 @@ const EMAIL_EVENTS = {
   LoginUser: "loginUser",
   ForgetPassword: "forgetPassword",
   ResetPassword: "resetPassword",
+  WelcomeUser: "welcomeUser",
 };
 
 // Allowed files types for upload

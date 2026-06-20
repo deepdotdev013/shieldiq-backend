@@ -1,7 +1,16 @@
-const { RESPONSE_CODES, VALIDATION_EVENTS, ROLES } =
-  require("../../../configs/constants").constants;
+const {
+  RESPONSE_CODES,
+  VALIDATION_EVENTS,
+  ROLES,
+  SALT_ROUNDS,
+  UUID,
+  BCRYPT,
+  EMAIL_EVENTS,
+} = require("../../../configs/constants").constants;
+const { generateRandomPassword } = require("../../utils/generatePassword");
 const { validateUserData } = require("../../validations/UserValidation");
 const { sequelize, User } = require("../../models");
+const { sendMail } = require("../../helpers/sendMail");
 
 module.exports = {
   /**
@@ -364,6 +373,114 @@ module.exports = {
         status: RESPONSE_CODES.Ok,
         message: req.__("USER_DETAILS_DELETED_SUCCESS"),
         data: null,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      return res.status(RESPONSE_CODES.ServerError).json({
+        status: RESPONSE_CODES.ServerError,
+        message: req.__("WENTS_WRONG"),
+        data: null,
+      });
+    }
+  },
+
+  /**
+   * @name createSingleUser
+   * @path /admin/users
+   * @method POST
+   * @schema User
+   * @param {string} - req.body.fullName - User full name
+   * @param {string} - req.body.email - User email
+   * @param {string} - req.body.department - User department
+   * @description This method is used to create a single user by admin.
+   * @returns {Object} JSON object containing the user data
+   * @author Deep Panchal
+   */
+  createSingleUser: async (req, res) => {
+    try {
+      const bodyData = {
+        id: UUID.v4(),
+        fullName: req.body?.fullName && req.body.fullName.trim(),
+        email: req.body?.email && req.body.email.toLowerCase().trim(),
+        department: req.body?.department && req.body.department.toLowerCase(),
+        eventCode: VALIDATION_EVENTS.CreateSingleUser,
+      };
+
+      // Validate the incoming data
+      const result = validateUserData(bodyData);
+
+      // If the validation fails, send an error
+      if (result.hasError) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("VALIDATION_ERROR"),
+          error: result.errors,
+        });
+      }
+
+      // Check if the user exists.
+      const isUserExists = await User.findOne({
+        where: {
+          email: bodyData?.email,
+          isDeleted: false,
+        },
+      });
+      if (isUserExists) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("USER_ALREADY_EXISTS"),
+          data: null,
+        });
+      }
+
+      // Generate a random password for the user.
+      const password = generateRandomPassword(12);
+
+      // Hash the password.
+      const hashedPassword = await BCRYPT.hash(password, SALT_ROUNDS);
+
+      // Create the user.
+      const user = await User.create({
+        id: bodyData?.id,
+        fullName: bodyData?.fullName,
+        email: bodyData?.email,
+        department: bodyData?.department,
+        password: hashedPassword,
+        isActive: true,
+        isEmailVerified: true,
+        role: ROLES.User,
+      });
+
+      // Create the input params.
+      const inputs = {
+        subType: EMAIL_EVENTS.WelcomeUser,
+        payload: {
+          lang: "en",
+          name: user.fullName || "User",
+          toUser: user.email,
+          MailSubject: req.__("WELCOME_USER_TITLE"),
+          password: password,
+          supportEmail: process.env.SMTP_SENDER,
+          websiteLink: process.env.WEBSITE_URL || "www.google.com",
+        },
+      };
+
+      // Send the email
+      await sendMail(inputs);
+
+      // Return the user data.
+      return res.status(RESPONSE_CODES.Created).json({
+        status: RESPONSE_CODES.Created,
+        message: req.__("USER_CREATED_SUCCESS"),
+        data: {
+          id: user?.id,
+          fullName: user?.fullName,
+          email: user?.email,
+          department: user?.department,
+          role: user?.role,
+          isActive: user?.isActive,
+          isEmailVerified: user?.isEmailVerified,
+        },
       });
     } catch (error) {
       console.log("error: ", error);

@@ -145,6 +145,17 @@ const validateUserData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.CreateSingleUser: {
+      // Define the rules
+      rules = {
+        id: "string|required",
+        fullName: "string|required",
+        email: "email|required",
+        department: "string|required",
+      };
+      break;
+    }
+
     default:
       break;
   }

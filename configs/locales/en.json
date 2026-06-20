@@ -10,6 +10,7 @@
 	"TOKEN_GENERATION_ERROR": "Error generating token. Please try again later.",
 	"VERIFY_EMAIL_TITLE": "Verify Your Email - ShieldIQ Account Activation 🚀",
 	"FORGET_PASSWORD_TITLE": "Reset Your Password - ShieldIQ Password Reset 🔑",
+	"WELCOME_USER_TITLE": "Welcome to ShieldIQ! Your Journey Starts Here 🎉",
 	"INVALID_TOKEN": "The verification link is invalid or has expired. Please request a new one.",
 	"EMAIL_ALREADY_VERIFIED": "Your email is already verified. You can log in now.",
 	"EMAIL_VERIFY_SUCCESS": "Your email has been successfully verified.",
@@ -30,5 +31,7 @@
 	"USERS_FETCHED_SUCCESS": "Users fetched successfully.",
 	"USER_DETAILS_FETCHED_SUCCESS": "User details fetched successfully.",
 	"USER_DETAILS_UPDATED_SUCCESS": "User details updated successfully.",
-	"USER_DETAILS_DELETED_SUCCESS": "User details deleted successfully."
+	"USER_DETAILS_DELETED_SUCCESS": "User details deleted successfully.",
+	"USER_CREATED_SUCCESS": "User created successfully.",
+	"USER_ALREADY_EXISTS": "User already exists."
 }
