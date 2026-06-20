@@ -10,7 +10,9 @@ const { createServer } = require("http");
 const { I18n } = require("i18n");
 
 // Load routes and configs
-const routes = require("./src/routes/index");
+const authRoutes = require("./src/routes/user/AuthRoute");
+const userRoutes = require("./src/routes/user");
+const adminRoutes = require("./src/routes/admin");
 const { locales, defaultLocale } = require("./configs/i18n");
 const { cors } = require("./configs/security");
 const sessionMiddleware = require("./configs/session");
@@ -39,7 +41,9 @@ app.use(cookieParser());
 app.use(i18n.init);
 
 // Routes
-app.use("/api/v1", routes);
+app.use("/api/v1", authRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 // Start server
 const PORT = process.env.PORT || 8080;

@@ -39,6 +39,7 @@ const VALIDATION_EVENTS = {
   UpdateSingleUser: "updateSingleUser",
   DeleteSingleUser: "deleteSingleUser",
   CreateSingleUser: "createSingleUser",
+  CreateCampaign: "createCampaign",
 };
 
 // JWT Types
@@ -96,6 +97,14 @@ const ROLES = {
   User: "user",
 };
 
+// Status of campaigns
+const CAMPAIGN_STATUS = {
+  Draft: "draft",
+  Active: "active",
+  Completed: "completed",
+  Cancelled: "cancelled",
+};
+
 // Export the constants
 module.exports.constants = {
   defaultAttributes,
@@ -122,4 +131,5 @@ module.exports.constants = {
   DEPARTMENT,
   ROLES,
   Op,
+  CAMPAIGN_STATUS,
 };

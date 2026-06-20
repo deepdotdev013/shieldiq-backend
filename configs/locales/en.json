@@ -33,5 +33,9 @@
 	"USER_DETAILS_UPDATED_SUCCESS": "User details updated successfully.",
 	"USER_DETAILS_DELETED_SUCCESS": "User details deleted successfully.",
 	"USER_CREATED_SUCCESS": "User created successfully.",
-	"USER_ALREADY_EXISTS": "User already exists."
+	"USER_ALREADY_EXISTS": "User already exists.",
+	"CAMPAIGN_CREATED_SUCCESS": "Campaign created successfully.",
+	"CAMPAIGN_START_DATE_NOT_BE_IN_PAST": "Campaign start date cannot be in past.",
+	"CAMPAIGN_END_DATE_NOT_BE_IN_PAST": "Campaign end date cannot be in past.",
+	"CAMPAIGN_END_DATE_CANT_BE_BEFORE_START_DATE": "Campaign end date cannot be before start date."
 }
