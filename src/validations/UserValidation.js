@@ -105,6 +105,46 @@ const validateUserData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.GetSingleUserDetails: {
+      // Define the rules
+      rules = {
+        userId: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.UpdateSingleUser: {
+      // Define the rules
+      rules = {
+        userId: "string|required",
+        fullName: "string",
+        department: [
+          "string",
+          {
+            in: [
+              DEPARTMENT.IT_SECURITY,
+              DEPARTMENT.ENGINEERING,
+              DEPARTMENT.HR,
+              DEPARTMENT.FINANCE,
+              DEPARTMENT.SALES,
+              DEPARTMENT.MARKETING,
+              DEPARTMENT.EXECUTIVE,
+            ],
+          },
+        ],
+        isActive: "boolean",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.DeleteSingleUser: {
+      // Define the rules
+      rules = {
+        userId: "string|required",
+      };
+      break;
+    }
+
     default:
       break;
   }

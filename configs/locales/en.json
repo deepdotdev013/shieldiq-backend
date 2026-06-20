@@ -27,5 +27,8 @@
 	"REFRESH_TOKEN_SUCCESS": "Access token and refresh token have been refreshed successfully.",
 	"INVALID_REFRESH_TOKEN": "Invalid refresh token. Please login again.",
 	"UNAUTHORIZED_ACCESS": "You do not have permission to access this resource.",
-	"USERS_FETCHED_SUCCESS": "Users fetched successfully."
+	"USERS_FETCHED_SUCCESS": "Users fetched successfully.",
+	"USER_DETAILS_FETCHED_SUCCESS": "User details fetched successfully.",
+	"USER_DETAILS_UPDATED_SUCCESS": "User details updated successfully.",
+	"USER_DETAILS_DELETED_SUCCESS": "User details deleted successfully."
 }

@@ -35,6 +35,9 @@ const VALIDATION_EVENTS = {
   ForgetPassword: "forgetPassword",
   RefreshToken: "refreshToken",
   GetAllUsers: "getAllUsers",
+  GetSingleUserDetails: "getSingleUserDetails",
+  UpdateSingleUser: "updateSingleUser",
+  DeleteSingleUser: "deleteSingleUser",
 };
 
 // JWT Types
