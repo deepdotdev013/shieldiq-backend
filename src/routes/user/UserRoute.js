@@ -11,7 +11,11 @@ const { CheckUserAuth } = require("../../policies/CheckUserAuth");
 const UserController = require("../../controllers/user/UserController");
 
 // Define the routes
-ROUTER.get("/me", [CheckUserAuth], UserController.getUserDetails);
+ROUTER.get("/me", [CheckUserAuth], UserController.getUserDetails).post(
+  "/update-profile",
+  [CheckUserAuth],
+  UserController.updateProfileDetails,
+);
 
 // Export the router
 module.exports = ROUTER;

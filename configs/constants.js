@@ -45,6 +45,7 @@ const VALIDATION_EVENTS = {
   ListAllCampaigns: "listAllCampaigns",
   UpdateCampaign: "updateCampaign",
   DeleteCampaign: "deleteCampaign",
+  UpdateProfileDetails: "updateProfileDetails",
 };
 
 // JWT Types

@@ -156,6 +156,29 @@ const validateUserData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.UpdateProfileDetails: {
+      // Define the rules
+      rules = {
+        fullName: "string",
+        department: [
+          "string",
+          {
+            in: [
+              DEPARTMENT.IT_SECURITY,
+              DEPARTMENT.ENGINEERING,
+              DEPARTMENT.HR,
+              DEPARTMENT.FINANCE,
+              DEPARTMENT.SALES,
+              DEPARTMENT.MARKETING,
+              DEPARTMENT.EXECUTIVE,
+            ],
+          },
+        ],
+        profilePhotoId: "string",
+      };
+      break;
+    }
+
     default:
       break;
   }

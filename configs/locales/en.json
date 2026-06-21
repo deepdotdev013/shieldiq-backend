@@ -42,5 +42,6 @@
 	"CAMPAIGNS_FETCHED_SUCCESS": "Campaigns fetched successfully.",
 	"CAMPAIGN_UPDATED_SUCCESS": "Campaign updated successfully.",
 	"CAMPAIGN_DELETED_SUCCESS": "Campaign deleted successfully.",
-	"CAMPAIGN_NOT_FOUND": "Campaign not found."
+	"CAMPAIGN_NOT_FOUND": "Campaign not found.",
+	"USER_UPDATED_SUCCESS": "Details updated successfully."
 }
