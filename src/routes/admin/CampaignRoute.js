@@ -11,7 +11,11 @@ const { CheckAdminAuth } = require("../../policies/CheckAdminAuth");
 const CampaignController = require("../../controllers/admin/CampaignController");
 
 // Define the routes
-ROUTER.post("/", [CheckAdminAuth], CampaignController.createCampaign);
+ROUTER.post("/", [CheckAdminAuth], CampaignController.createCampaign)
+  .get("/", [CheckAdminAuth], CampaignController.listAllCampaigns)
+  .get("/:id", [CheckAdminAuth], CampaignController.getCampaign)
+  .patch("/:id", [CheckAdminAuth], CampaignController.updateCampaign)
+  .post("/:id", [CheckAdminAuth], CampaignController.deleteCampaign);
 
 // Export the router
 module.exports = ROUTER;

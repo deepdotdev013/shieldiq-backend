@@ -53,6 +53,9 @@ module.exports = {
       }
 
       // Build the SQL query to get all users
+      let allUsersQueryCount = `SELECT
+        COUNT(*)::INTEGER AS "count"`;
+
       let allUsersQuery = `
       SELECT
         U."id",
@@ -71,8 +74,9 @@ module.exports = {
             M."mediaUrl"
           )
         END AS "profilePhoto",
-        U."createdAt"
-      FROM
+        U."createdAt"`;
+
+      let whereClause = ` FROM
         "users" U
         LEFT JOIN "media" M ON U."profilePhotoId" = M."id"
         AND M."isDeleted" = FALSE
@@ -82,12 +86,12 @@ module.exports = {
 
       // Apply conditions on the query.
       if (queryData?.department && queryData?.department !== "") {
-        allUsersQuery += ` AND U."department" = :department`;
+        whereClause += ` AND U."department" = :department`;
       }
 
       // Apply conditions on the query.
       if (queryData?.search && queryData?.search !== "") {
-        allUsersQuery += ` AND (U."fullName" LIKE :search OR U."email" LIKE :search OR U."department" LIKE :search)`;
+        whereClause += ` AND (U."fullName" LIKE :search OR U."email" LIKE :search OR U."department" LIKE :search)`;
       }
 
       // Map and whitelist sort column to prevent SQL injection
@@ -101,29 +105,39 @@ module.exports = {
       const sortOrder =
         queryData.sortOrder.toLowerCase() === "asc" ? "ASC" : "DESC";
 
-      // Add sorting to the query.
-      allUsersQuery += ` ORDER BY U."${sortBy}" ${sortOrder}`;
+      // Build the queries
+      const countQuery = `${allUsersQueryCount} ${whereClause}`;
+      const selectQuery = `${allUsersQuery} ${whereClause} ORDER BY U."${sortBy}" ${sortOrder} LIMIT :limit OFFSET :offset`;
 
-      // Add limit and offset to the query.
-      allUsersQuery += ` LIMIT :limit OFFSET :offset`;
-
-      // Run the sql query using sequelize query.
-      const getAllUsersDetails = await sequelize.query(allUsersQuery, {
-        type: sequelize.QueryTypes.SELECT,
-        replacements: {
-          userId: req.user.id,
-          department: queryData?.department || "",
-          search: `%${queryData?.search || ""}%`,
-          limit: queryData?.limit,
-          offset: queryData?.skip,
-        },
-      });
+      // Run the sql queries using sequelize query.
+      const [getAllUsersDetails, getAllUsersCount] = await Promise.all([
+        sequelize.query(selectQuery, {
+          type: sequelize.QueryTypes.SELECT,
+          replacements: {
+            userId: req.user.id,
+            department: queryData?.department || "",
+            search: `%${queryData?.search || ""}%`,
+            limit: queryData?.limit,
+            offset: queryData?.skip,
+          },
+        }),
+        sequelize.query(countQuery, {
+          type: sequelize.QueryTypes.SELECT,
+          replacements: {
+            department: queryData?.department || "",
+            search: `%${queryData?.search || ""}%`,
+          },
+        }),
+      ]);
 
       // Return the users
       return res.status(RESPONSE_CODES.Ok).json({
         status: RESPONSE_CODES.Ok,
         message: req.__("USERS_FETCHED_SUCCESS"),
-        data: getAllUsersDetails,
+        data: {
+          totalCount: Number(getAllUsersCount?.[0]?.count || 0),
+          users: getAllUsersDetails,
+        },
       });
     } catch (error) {
       console.log("error: ", error);

@@ -24,6 +24,7 @@ const RESPONSE_CODES = {
   Created: 201,
   BadRequest: 400,
   Unauthorized: 401,
+  NotFound: 404,
   ServerError: 500,
 };
 
@@ -40,6 +41,10 @@ const VALIDATION_EVENTS = {
   DeleteSingleUser: "deleteSingleUser",
   CreateSingleUser: "createSingleUser",
   CreateCampaign: "createCampaign",
+  GetCampaign: "getCampaign",
+  ListAllCampaigns: "listAllCampaigns",
+  UpdateCampaign: "updateCampaign",
+  DeleteCampaign: "deleteCampaign",
 };
 
 // JWT Types

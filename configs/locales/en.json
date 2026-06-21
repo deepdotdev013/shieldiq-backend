@@ -37,5 +37,10 @@
 	"CAMPAIGN_CREATED_SUCCESS": "Campaign created successfully.",
 	"CAMPAIGN_START_DATE_NOT_BE_IN_PAST": "Campaign start date cannot be in past.",
 	"CAMPAIGN_END_DATE_NOT_BE_IN_PAST": "Campaign end date cannot be in past.",
-	"CAMPAIGN_END_DATE_CANT_BE_BEFORE_START_DATE": "Campaign end date cannot be before start date."
+	"CAMPAIGN_END_DATE_CANT_BE_BEFORE_START_DATE": "Campaign end date cannot be before start date.",
+	"CAMPAIGN_FETCHED_SUCCESS": "Campaign details fetched successfully.",
+	"CAMPAIGNS_FETCHED_SUCCESS": "Campaigns fetched successfully.",
+	"CAMPAIGN_UPDATED_SUCCESS": "Campaign updated successfully.",
+	"CAMPAIGN_DELETED_SUCCESS": "Campaign deleted successfully.",
+	"CAMPAIGN_NOT_FOUND": "Campaign not found."
 }

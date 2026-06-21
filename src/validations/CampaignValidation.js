@@ -32,6 +32,55 @@ const validateCampaignData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.GetCampaign: {
+      rules = {
+        campaignId: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.ListAllCampaigns: {
+      rules = {
+        search: "string",
+        limit: "integer|required",
+        skip: "integer|required",
+        sort: "string|required",
+        sortOrder: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.UpdateCampaign: {
+      rules = {
+        campaignId: "string|required",
+        title: "string",
+        description: "string",
+        startDate: "string",
+        endDate: "string",
+        targetDepartment: "string",
+        emailType: "string",
+        status: [
+          "string",
+          {
+            in: [
+              CAMPAIGN_STATUS.Draft,
+              CAMPAIGN_STATUS.Active,
+              CAMPAIGN_STATUS.Completed,
+              CAMPAIGN_STATUS.Cancelled,
+            ],
+          },
+        ],
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.DeleteCampaign: {
+      rules = {
+        campaignId: "string|required",
+      };
+      break;
+    }
+
     default:
       break;
   }

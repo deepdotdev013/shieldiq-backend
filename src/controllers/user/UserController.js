@@ -16,7 +16,6 @@ module.exports = {
       // Query to fetch users details.
       const fetchUserDetails = `SELECT
         	U."id",
-        	U."profilePhotoId",
         	U."fullName",
         	U."email",
         	U."department",
