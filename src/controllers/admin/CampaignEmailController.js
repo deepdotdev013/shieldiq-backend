@@ -192,8 +192,6 @@ module.exports = {
         skip: req?.query?.skip ? parseInt(req?.query?.skip) : 0,
         sort: req?.query?.sort || "createdAt",
         sortOrder: req?.query?.sortOrder || "desc",
-        templates:
-          req?.query?.templates === "true" || req?.query?.templates === true,
         eventCode: VALIDATION_EVENTS.ListAllCampaignEmails,
       };
 
@@ -232,10 +230,6 @@ module.exports = {
       if (queryData.search && queryData.search !== "") {
         whereClause += ` AND (E."sender" LIKE :search OR E."fromEmail" LIKE :search OR E."subject" LIKE :search OR E."body" LIKE :search)`;
         replacements.search = `%${queryData.search}%`;
-      }
-
-      if (queryData.templates) {
-        whereClause += ` AND E."isCreatedByAdmin" = false AND E."createdBy" = 'system'`;
       }
 
       // Sorting whitelist
@@ -328,6 +322,7 @@ module.exports = {
       const campaignEmail = await CampaignEmail.findOne({
         where: {
           id: bodyData.campaignEmailId,
+          isCreatedByAdmin: true,
           isDeleted: false,
         },
       });
@@ -335,8 +330,7 @@ module.exports = {
       if (!campaignEmail) {
         return res.status(RESPONSE_CODES.NotFound).json({
           status: RESPONSE_CODES.NotFound,
-          message:
-            req.__("CAMPAIGN_EMAIL_NOT_FOUND") || "Campaign email not found",
+          message: req.__("CAMPAIGN_EMAIL_NOT_FOUND"),
           data: null,
         });
       }
@@ -412,6 +406,7 @@ module.exports = {
       const campaignEmail = await CampaignEmail.findOne({
         where: {
           id: queryData.campaignEmailId,
+          isCreatedByAdmin: true,
           isDeleted: false,
         },
       });

@@ -129,7 +129,6 @@ const validateCampaignData = (bodyData) => {
         sort: "string|required",
         sortOrder: "string|required",
         campaignId: "string",
-        templates: "boolean",
       };
       break;
     }
