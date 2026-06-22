@@ -1,4 +1,4 @@
-const { VALIDATOR, VALIDATION_EVENTS, CAMPAIGN_STATUS } =
+const { VALIDATOR, VALIDATION_EVENTS, CAMPAIGN_STATUS, CAMPAIGN_EMAIL_TYPES } =
   require("../../configs/constants").constants;
 
 // Create a function to validate the data.
@@ -10,12 +10,22 @@ const validateCampaignData = (bodyData) => {
     case VALIDATION_EVENTS.CreateCampaign: {
       // Define the rules
       rules = {
-        title: "string|required",
-        description: "string|required",
+        title: "string|required|min:3|max:255",
+        description: "string|required|min:3|max:255",
         startDate: "string",
         endDate: "string|required",
         targetDepartment: "string|required",
-        emailType: "string|required",
+        emailType: [
+          "string",
+          "required",
+          {
+            in: [
+              CAMPAIGN_EMAIL_TYPES.Phishing,
+              CAMPAIGN_EMAIL_TYPES.Training,
+              CAMPAIGN_EMAIL_TYPES.Alert,
+            ],
+          },
+        ],
         status: [
           "string",
           "required",
@@ -58,7 +68,16 @@ const validateCampaignData = (bodyData) => {
         startDate: "string",
         endDate: "string",
         targetDepartment: "string",
-        emailType: "string",
+        emailType: [
+          "string",
+          {
+            in: [
+              CAMPAIGN_EMAIL_TYPES.Phishing,
+              CAMPAIGN_EMAIL_TYPES.Training,
+              CAMPAIGN_EMAIL_TYPES.Alert,
+            ],
+          },
+        ],
         status: [
           "string",
           {
@@ -77,6 +96,60 @@ const validateCampaignData = (bodyData) => {
     case VALIDATION_EVENTS.DeleteCampaign: {
       rules = {
         campaignId: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.CreateCampaignEmail: {
+      rules = {
+        campaignId: "string",
+        sender: "string|required|min:3|max:255",
+        fromEmail: "string|required|min:3|max:255",
+        subject: "string|required|min:3|max:255",
+        body: "string|required|min:3",
+        linkText: "string",
+        isPhishing: "boolean",
+        isCreatedByAdmin: "boolean",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.GetCampaignEmail: {
+      rules = {
+        campaignEmailId: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.ListAllCampaignEmails: {
+      rules = {
+        search: "string",
+        limit: "integer|required",
+        skip: "integer|required",
+        sort: "string|required",
+        sortOrder: "string|required",
+        campaignId: "string",
+        templates: "boolean",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.UpdateCampaignEmail: {
+      rules = {
+        campaignEmailId: "string|required",
+        sender: "string",
+        fromEmail: "string",
+        subject: "string",
+        body: "string",
+        linkText: "string",
+        isPhishing: "boolean",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.DeleteCampaignEmail: {
+      rules = {
+        campaignEmailId: "string|required",
       };
       break;
     }

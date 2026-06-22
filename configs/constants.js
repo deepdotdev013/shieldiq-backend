@@ -45,6 +45,11 @@ const VALIDATION_EVENTS = {
   ListAllCampaigns: "listAllCampaigns",
   UpdateCampaign: "updateCampaign",
   DeleteCampaign: "deleteCampaign",
+  CreateCampaignEmail: "createCampaignEmail",
+  GetCampaignEmail: "getCampaignEmail",
+  ListAllCampaignEmails: "listAllCampaignEmails",
+  UpdateCampaignEmail: "updateCampaignEmail",
+  DeleteCampaignEmail: "deleteCampaignEmail",
   UpdateProfileDetails: "updateProfileDetails",
 };
 
@@ -111,6 +116,20 @@ const CAMPAIGN_STATUS = {
   Cancelled: "cancelled",
 };
 
+// Types of emails
+const CAMPAIGN_EMAIL_TYPES = {
+  Phishing: "phishing",
+  Training: "training",
+  Alert: "alert",
+};
+
+// System Generated Email
+const SYSTEM_GENERATED_EMAIL = {
+  System: "system",
+  Ai: "ai",
+  Admin: "admin",
+};
+
 // Export the constants
 module.exports.constants = {
   defaultAttributes,
@@ -138,4 +157,6 @@ module.exports.constants = {
   ROLES,
   Op,
   CAMPAIGN_STATUS,
+  SYSTEM_GENERATED_EMAIL,
+  CAMPAIGN_EMAIL_TYPES,
 };
