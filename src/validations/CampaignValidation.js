@@ -38,6 +38,7 @@ const validateCampaignData = (bodyData) => {
             ],
           },
         ],
+        campaignEmailIds: "array",
       };
       break;
     }
@@ -89,6 +90,8 @@ const validateCampaignData = (bodyData) => {
             ],
           },
         ],
+        deletedCampaignEmailIds: "array",
+        newCampaignEmailIds: "array",
       };
       break;
     }

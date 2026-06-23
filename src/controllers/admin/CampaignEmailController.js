@@ -73,24 +73,33 @@ module.exports = {
       };
 
       let createdCampaignEmail;
-      await sequelize.transaction(async (t) => {
-        createdCampaignEmail = await CampaignEmail.create(emailData, {
-          transaction: t,
-        });
+      try {
+        await sequelize.transaction(async (t) => {
+          createdCampaignEmail = await CampaignEmail.create(emailData, {
+            transaction: t,
+          });
 
-        // If campaign id is present, create a mapping.
-        if (bodyData?.campaignId) {
-          await CampaignEmailMapping.create(
-            {
-              id: UUID.v4(),
-              campaignId: bodyData?.campaignId,
-              campaignEmailId: createdCampaignEmail?.id,
-              createdBy: req?.user?.id,
-            },
-            { transaction: t },
-          );
-        }
-      });
+          // If campaign id is present, create a mapping.
+          if (bodyData?.campaignId) {
+            await CampaignEmailMapping.create(
+              {
+                id: UUID.v4(),
+                campaignId: bodyData?.campaignId,
+                campaignEmailId: createdCampaignEmail?.id,
+                createdBy: req?.user?.id,
+              },
+              { transaction: t },
+            );
+          }
+        });
+      } catch (error) {
+        console.log("transaction error: ", error);
+        return res.status(RESPONSE_CODES.ServerError).json({
+          status: RESPONSE_CODES.ServerError,
+          message: req.__("TRANSACTION_WENTS_WRONG"),
+          data: null,
+        });
+      }
 
       // Return the created email
       return res.status(RESPONSE_CODES.Created).json({

@@ -3,7 +3,7 @@ const {
 } = require("../../validations/CampaignValidation");
 const { UUID, VALIDATION_EVENTS, RESPONSE_CODES, CAMPAIGN_STATUS } =
   require("../../../configs/constants").constants;
-const { sequelize, Campaign } = require("../../models");
+const { sequelize, Campaign, CampaignEmailMapping } = require("../../models");
 
 module.exports = {
   /**
@@ -16,6 +16,7 @@ module.exports = {
    * @param {string} - req.body.startDate - Start date of the campaign
    * @param {string} - req.body.endDate - End date of the campaign
    * @param {string} - req.body.targetDepartment - Target department of the campaign
+   * @param {Array} - req.body.campaignEmailIds - Array of campaign email ids
    * @description This method is used to create a new campaign.
    * @returns {Object} JSON object containing the campaign data
    * @author Deep Panchal
@@ -32,6 +33,7 @@ module.exports = {
         emailType: req?.body?.emailType,
         status: req?.body?.status || CAMPAIGN_STATUS.Draft,
         createdBy: req?.user?.id,
+        campaignEmailIds: req?.body?.campaignEmailIds,
         eventCode: VALIDATION_EVENTS.CreateCampaign,
       };
 
@@ -83,7 +85,23 @@ module.exports = {
       // Create a campaign.
       const createdCampaign = await Campaign.create(bodyData);
 
-      // Return the users
+      // Create mappings if campaignEmailIds array is provided.
+      if (
+        Array.isArray(bodyData.campaignEmailIds) &&
+        bodyData.campaignEmailIds.length > 0
+      ) {
+        const mappings = bodyData.campaignEmailIds.map((campaignEmailId) => ({
+          id: UUID.v4(),
+          campaignId: createdCampaign.id,
+          campaignEmailId,
+          createdBy: req.user.id,
+        }));
+
+        // Create the mappings in bulk
+        await CampaignEmailMapping.bulkCreate(mappings);
+      }
+
+      // Return the created campaign
       return res.status(RESPONSE_CODES.Created).json({
         status: RESPONSE_CODES.Created,
         message: req.__("CAMPAIGN_CREATED_SUCCESS"),
@@ -128,11 +146,61 @@ module.exports = {
         });
       }
 
-      // Check if the campaign exists.
-      const campaign = await Campaign.findOne({
-        where: {
-          id: queryData.campaignId,
-          isDeleted: false,
+      let campaignDetailsQuery = `
+      SELECT
+        C."id",
+        C."title",
+        C."description",
+        C."startDate",
+        C."endDate",
+        C."targetDepartment",
+	      C."emailType",
+	      C."status",
+	      C."createdAt",
+        CASE
+            WHEN CEM."campaignId" IS NULL THEN NULL
+            ELSE COALESCE(
+                JSONB_AGG(
+                    JSONB_BUILD_OBJECT(
+                        'id', CE."id",
+                        'sender', CE."sender",
+                        'fromEmail', CE."fromEmail",
+                        'subject', CE."subject",
+                        'body', CE."body",
+                        'linkText', CE."linkText",
+                        'createdAt', CE."createdAt"
+                    )
+                    ORDER BY CE."createdAt" ASC
+                ) FILTER (WHERE CE."id" IS NOT NULL),
+                '[]'::jsonb
+            )
+        END AS "campaignEmails"
+      FROM
+	      "campaigns" C
+	    LEFT JOIN "campaign_email_mappings" CEM ON CEM."campaignId" = C."id"
+	      AND CEM."isDeleted" = FALSE
+	    LEFT JOIN "campaign_emails" CE ON CE."id" = CEM."campaignEmailId"
+	      AND CE."isDeleted" = FALSE
+      WHERE
+	      C."isDeleted" = FALSE
+	      AND C."id" =:campaignId
+      GROUP BY
+	      C."id",
+	      C."title",
+	      C."description",
+	      C."startDate",
+	      C."endDate",
+	      C."targetDepartment",
+	      C."emailType",
+	      C."status",
+	      C."createdAt",
+        CEM."campaignId";`;
+
+      // Execute the query
+      const campaign = await sequelize.query(campaignDetailsQuery, {
+        type: sequelize.QueryTypes.SELECT,
+        replacements: {
+          campaignId: queryData?.campaignId,
         },
       });
 
@@ -148,7 +216,7 @@ module.exports = {
       return res.status(RESPONSE_CODES.Ok).json({
         status: RESPONSE_CODES.Ok,
         message: req.__("CAMPAIGN_FETCHED_SUCCESS"),
-        data: campaign,
+        data: campaign[0] || {},
       });
     } catch (error) {
       console.log("error: ", error);
@@ -288,6 +356,8 @@ module.exports = {
    * @param {string} - req.body.targetDepartment - Target department of the campaign
    * @param {string} - req.body.emailType - Email type of the campaign
    * @param {string} - req.body.status - Status of the campaign
+   * @param {Array} - req.body.deletedCampaignEmailIds - Array of campaign email ids to be deleted
+   * @param {Array} - req.body.newCampaignEmailIds - Array of campaign email ids to be added
    * @description This method is used to update a single campaign's details.
    * @returns {Object} JSON object containing the campaign data
    * @author Deep Panchal
@@ -303,6 +373,8 @@ module.exports = {
         targetDepartment: req.body.targetDepartment,
         emailType: req.body.emailType,
         status: req.body.status,
+        deletedCampaignEmailIds: req.body.deletedCampaignEmailIds,
+        newCampaignEmailIds: req.body.newCampaignEmailIds,
         eventCode: VALIDATION_EVENTS.UpdateCampaign,
       };
 
@@ -390,12 +462,54 @@ module.exports = {
       updatedValue.updatedAt = Date.now();
       updatedValue.updatedBy = req.user.id;
 
-      // Update the campaign details
-      await Campaign.update(updatedValue, {
-        where: {
-          id: campaign.id,
-        },
-      });
+      try {
+        await sequelize.transaction(async (t) => {
+          // Update the campaign details
+          await Campaign.update(updatedValue, {
+            where: {
+              id: campaign.id,
+            },
+          });
+          if (
+            Array.isArray(queryData.deletedCampaignEmailIds) &&
+            queryData.deletedCampaignEmailIds.length > 0
+          ) {
+            await CampaignEmailMapping.destroy({
+              where: {
+                campaignId: queryData.campaignId,
+                campaignEmailId: queryData.deletedCampaignEmailIds,
+                isDeleted: false,
+              },
+              transaction: t,
+            });
+          }
+
+          // Add new mappings
+          if (
+            Array.isArray(queryData.newCampaignEmailIds) &&
+            queryData.newCampaignEmailIds.length > 0
+          ) {
+            const mappings = queryData.newCampaignEmailIds.map(
+              (campaignEmailId) => ({
+                id: UUID.v4(),
+                campaignId: queryData.campaignId,
+                campaignEmailId,
+                createdBy: req.user.id,
+              }),
+            );
+
+            // Bulk create the mappings.
+            await CampaignEmailMapping.bulkCreate(mappings, { transaction: t });
+          }
+        });
+      } catch (error) {
+        console.log("transaction error: ", error);
+        return res.status(RESPONSE_CODES.ServerError).json({
+          status: RESPONSE_CODES.ServerError,
+          message: req.__("TRANSACTION_WENTS_WRONG"),
+          data: null,
+        });
+      }
 
       // Return the updated details
       return res.status(RESPONSE_CODES.Ok).json({
