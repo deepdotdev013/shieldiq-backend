@@ -51,5 +51,9 @@
 	"TRANSACTION_WENTS_WRONG": "Transaction failed. Please try again.",
 	"SIMULATION_NOT_FOUND": "Simulation not found.",
 	"DUPLICATE_EVENT": "Duplicate event. This event has already been recorded for the specified simulation.",
-	"EVENT_CREATED_SUCCESS": "Event created successfully."
+	"EVENT_CREATED_SUCCESS": "Event created successfully.",
+	"DASHBOARD_STATS_NOT_FOUND": "Dashboard stats not found.",
+	"DASHBOARD_STATS_FETCHED_SUCCESS": "Dashboard stats fetched successfully.",
+	"DASHBOARD_TRENDS_NOT_FOUND": "Dashboard trends not found.",
+	"DASHBOARD_TRENDS_FETCHED_SUCCESS": "Dashboard trends fetched successfully."
 }

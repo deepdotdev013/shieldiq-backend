@@ -135,8 +135,8 @@ const SYSTEM_GENERATED_EMAIL = {
 const CAMPAIGN_EVENTS = {
   Sent: "sent",
   Opened: "opened",
-  LinkClicked: "link_clicked",
-  Reported: "reported"
+  LinkClicked: "linkClicked",
+  Reported: "reported",
 };
 
 // Scores for user actions
@@ -144,7 +144,7 @@ const SCORES = {
   PHISHING_CLICK_PENALTY: -15, // Fell for phishing email
   PHISHING_REPORT_REWARD: +10, // Correctly identified phishing email
   FALSE_POSITIVE_PENALTY: -5, // Reported a safe email
-}
+};
 
 // Export the constants
 module.exports.constants = {
@@ -176,5 +176,5 @@ module.exports.constants = {
   SYSTEM_GENERATED_EMAIL,
   CAMPAIGN_EMAIL_TYPES,
   CAMPAIGN_EVENTS,
-  SCORES
+  SCORES,
 };
