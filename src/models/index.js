@@ -4,6 +4,7 @@ const Media = require("./Media");
 const Campaign = require("./Campaign");
 const CampaignEmail = require("./CampaignEmail");
 const CampaignEmailMapping = require("./CampaignEmailMapping");
+const CampaignEvent = require("./CampaignEvent");
 
 module.exports = {
   sequelize,
@@ -12,4 +13,5 @@ module.exports = {
   Campaign,
   CampaignEmail,
   CampaignEmailMapping,
+  CampaignEvent
 };

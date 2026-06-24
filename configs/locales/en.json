@@ -48,5 +48,8 @@
 	"CAMPAIGN_EMAIL_CREATED_SUCCESS": "CAMPAIGN_EMAIL_CREATED_SUCCESS",
 	"CAMPAIGN_EMAIL_UPDATED_SUCCESS": "CAMPAIGN_EMAIL_UPDATED_SUCCESS",
 	"CAMPAIGN_EMAIL_DELETED_SUCCESS": "CAMPAIGN_EMAIL_DELETED_SUCCESS",
-	"TRANSACTION_WENTS_WRONG": "Transaction failed. Please try again."
+	"TRANSACTION_WENTS_WRONG": "Transaction failed. Please try again.",
+	"SIMULATION_NOT_FOUND": "Simulation not found.",
+	"DUPLICATE_EVENT": "Duplicate event. This event has already been recorded for the specified simulation.",
+	"EVENT_CREATED_SUCCESS": "Event created successfully."
 }

@@ -3,7 +3,16 @@ const {
 } = require("../../validations/CampaignValidation");
 const { UUID, VALIDATION_EVENTS, RESPONSE_CODES, CAMPAIGN_STATUS } =
   require("../../../configs/constants").constants;
-const { sequelize, Campaign, CampaignEmailMapping } = require("../../models");
+const {
+  sequelize,
+  Campaign,
+  CampaignEmailMapping,
+  CampaignEvent,
+} = require("../../models");
+const {
+  applyScoreImpact,
+  computeScoreImpact,
+} = require("../../utils/scoreEngine");
 
 module.exports = {
   /**
@@ -591,6 +600,131 @@ module.exports = {
         status: RESPONSE_CODES.Ok,
         message: req.__("CAMPAIGN_DELETED_SUCCESS"),
         data: null,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      return res.status(RESPONSE_CODES.ServerError).json({
+        status: RESPONSE_CODES.ServerError,
+        message: req.__("WENTS_WRONG"),
+        data: null,
+      });
+    }
+  },
+
+  /**
+   * @name updateCampaign
+   * @path /admin/campaigns/:id
+   * @method PATCH
+   * @schema Campaign
+   * @param {string} - req.params.id - Campaign id
+   * @param {string} - req.body.title - Title of the campaign
+   * @param {string} - req.body.description - Description of the campaign
+   * @param {string} - req.body.startDate - Start date of the campaign
+   * @param {string} - req.body.endDate - End date of the campaign
+   * @param {string} - req.body.targetDepartment - Target department of the campaign
+   * @param {string} - req.body.emailType - Email type of the campaign
+   * @param {string} - req.body.status - Status of the campaign
+   * @param {Array} - req.body.deletedCampaignEmailIds - Array of campaign email ids to be deleted
+   * @param {Array} - req.body.newCampaignEmailIds - Array of campaign email ids to be added
+   * @description This method is used to update a single campaign's details.
+   * @returns {Object} JSON object containing the campaign data
+   * @author Deep Panchal
+   */
+  createCampaignEvent: async (req, res) => {
+    try {
+      const bodyData = {
+        userId: req.user.id,
+        campaignId: req.body.campaignId,
+        campaignEmailId: req.body.campaignEmailId,
+        eventType: req.body.eventType,
+        eventCode: VALIDATION_EVENTS.CreateCampaignEvent,
+      };
+
+      // Validate the incoming data
+      const result = validateCampaignData(bodyData);
+
+      // If the validation fails, send an error
+      if (result.hasError) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("VALIDATION_ERROR"),
+          error: result.errors,
+        });
+      }
+
+      // Find the simulation exists before making an event for it.
+      const isSimulationExist = await CampaignEmailMapping.findOne({
+        where: {
+          campaignId: bodyData.campaignId,
+          campaignEmailId: bodyData.campaignEmailId,
+          isDeleted: false,
+        },
+      });
+      if (!isSimulationExist) {
+        return res.status(RESPONSE_CODES.NotFound).json({
+          status: RESPONSE_CODES.NotFound,
+          message: req.__("SIMULATION_NOT_FOUND"),
+          data: null,
+        });
+      }
+
+      // Check for duplicate event for the same user, campaign, and campaign email.
+      const isDuplicateEvent = await CampaignEvent.findOne({
+        where: {
+          campaignId: bodyData.campaignId,
+          campaignEmailId: bodyData.campaignEmailId,
+          userId: bodyData.userId,
+          isDeleted: false,
+        },
+      });
+      if (isDuplicateEvent) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("DUPLICATE_EVENT"),
+          data: null,
+        });
+      }
+
+      // Compute the score impact based on the event type and whether the email is phishing.
+      const scoreImpact = await computeScoreImpact(
+        bodyData.eventType,
+        isSimulationExist.isPhishing,
+      );
+
+      let newEvent;
+      try {
+        await sequelize.transaction(async (t) => {
+          // Create new event for the user.
+          newEvent = await CampaignEvent.create(
+            {
+              id: UUID.v4(),
+              campaignId: bodyData.campaignId,
+              campaignEmailId: bodyData.campaignEmailId,
+              userId: bodyData.userId,
+              eventType: bodyData.eventType,
+              scoreImpact: scoreImpact,
+              createdBy: bodyData.userId,
+            },
+            { transaction: t },
+          );
+
+          // Apply the score impact to the user
+          await applyScoreImpact(bodyData.userId, scoreImpact, t);
+        });
+      } catch (error) {
+        console.log("transaction error: ", error);
+        return res.status(RESPONSE_CODES.ServerError).json({
+          status: RESPONSE_CODES.ServerError,
+          message: req.__("TRANSACTION_WENTS_WRONG"),
+          data: null,
+        });
+      }
+
+      // Return the success response.
+      return res.status(RESPONSE_CODES.Ok).json({
+        status: RESPONSE_CODES.Ok,
+        message: req.__("CAMPAIGN_EVENT_CREATED_SUCCESS"),
+        data: newEvent,
       });
     } catch (error) {
       console.log("error: ", error);

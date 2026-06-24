@@ -156,6 +156,16 @@ const validateCampaignData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.CreateCampaignEvent: {
+      rules = {
+        userId: "string|required",
+        campaignId: "string|required",
+        campaignEmailId: "string|required",
+        eventType: "string|required",
+      };
+      break;
+    }
+
     default:
       break;
   }
