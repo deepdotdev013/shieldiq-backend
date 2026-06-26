@@ -43,10 +43,12 @@ const applyScoreImpact = async (userId, score, transaction) => {
   await User.update(
     {
       securityScore: newScore,
+      updatedAt: new Date(),
+      updatedBy: userId,
     },
     {
       where: {
-        id: user.id,
+        id: userId,
       },
       transaction: transaction,
       fields: ["securityScore"],

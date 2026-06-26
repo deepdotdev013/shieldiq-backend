@@ -51,7 +51,9 @@ const VALIDATION_EVENTS = {
   UpdateCampaignEmail: "updateCampaignEmail",
   DeleteCampaignEmail: "deleteCampaignEmail",
   UpdateProfileDetails: "updateProfileDetails",
-  CreateCampaignEvent: "createCampaignEvent",
+  CreateSimulationEvent: "createSimulationEvent",
+  GetAllSimulations: "getAllSimulations",
+  GetAllSimulationEmails: "getAllSimulationEmails"
 };
 
 // JWT Types

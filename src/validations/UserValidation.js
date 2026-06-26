@@ -179,6 +179,18 @@ const validateUserData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.GetAllSimulations: {
+      // Define the rules
+      rules = {
+        search: "string",
+        limit: "integer|required",
+        offset: "integer|required",
+        status: "string",
+        sortOrder: "string|required",
+      };
+      break;
+    }
+
     default:
       break;
   }
