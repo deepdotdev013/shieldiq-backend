@@ -80,6 +80,42 @@ const sendMail = (inputs) => {
         break;
       }
 
+      case EMAIL_EVENTS.WelcomeUser: {
+        try {
+          FS.readFile(
+            `assets/templates/${lang}/welcomeUser.html`,
+            {
+              encoding: "utf-8",
+            },
+            async (error, html) => {
+              if (error) return error;
+              if (html) {
+                let template = handlebars.compile(html);
+                let replacements = {
+                  fullName: payload.name,
+                  email: payload.toUser,
+                  password: payload.password,
+                  websiteLink: payload.websiteLink,
+                  supportEmail: payload.supportEmail,
+                  year: new Date().getFullYear(),
+                };
+
+                let htmlToSend = template(replacements);
+                mailSender({
+                  mailTo: payload.toUser,
+                  mailSubject: payload.MailSubject,
+                  mailBody: htmlToSend,
+                });
+              }
+            },
+          );
+          break;
+        } catch (error) {
+          console.log("Error --> ", error);
+        }
+        break;
+      }
+
       default:
         break;
     }

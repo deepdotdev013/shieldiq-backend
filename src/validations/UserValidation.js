@@ -83,6 +83,114 @@ const validateUserData = (bodyData) => {
       break;
     }
 
+    case VALIDATION_EVENTS.RefreshToken: {
+      // Define the rules
+      rules = {
+        accessToken: "string|required",
+        refreshToken: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.GetAllUsers: {
+      // Define the rules
+      rules = {
+        search: "string",
+        department: "string",
+        limit: "integer|required",
+        skip: "integer|required",
+        sort: "string|required",
+        sortOrder: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.GetSingleUserDetails: {
+      // Define the rules
+      rules = {
+        userId: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.UpdateSingleUser: {
+      // Define the rules
+      rules = {
+        userId: "string|required",
+        fullName: "string",
+        department: [
+          "string",
+          {
+            in: [
+              DEPARTMENT.IT_SECURITY,
+              DEPARTMENT.ENGINEERING,
+              DEPARTMENT.HR,
+              DEPARTMENT.FINANCE,
+              DEPARTMENT.SALES,
+              DEPARTMENT.MARKETING,
+              DEPARTMENT.EXECUTIVE,
+            ],
+          },
+        ],
+        isActive: "boolean",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.DeleteSingleUser: {
+      // Define the rules
+      rules = {
+        userId: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.CreateSingleUser: {
+      // Define the rules
+      rules = {
+        id: "string|required",
+        fullName: "string|required",
+        email: "email|required",
+        department: "string|required",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.UpdateProfileDetails: {
+      // Define the rules
+      rules = {
+        fullName: "string",
+        department: [
+          "string",
+          {
+            in: [
+              DEPARTMENT.IT_SECURITY,
+              DEPARTMENT.ENGINEERING,
+              DEPARTMENT.HR,
+              DEPARTMENT.FINANCE,
+              DEPARTMENT.SALES,
+              DEPARTMENT.MARKETING,
+              DEPARTMENT.EXECUTIVE,
+            ],
+          },
+        ],
+        profilePhotoId: "string",
+      };
+      break;
+    }
+
+    case VALIDATION_EVENTS.GetAllSimulations: {
+      // Define the rules
+      rules = {
+        search: "string",
+        limit: "integer|required",
+        offset: "integer|required",
+        status: "string",
+        sortOrder: "string|required",
+      };
+      break;
+    }
+
     default:
       break;
   }

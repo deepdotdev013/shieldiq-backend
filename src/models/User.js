@@ -5,7 +5,8 @@
 
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../../configs/sequelize");
-const { defaultAttributes } = require("../../configs/constants").constants;
+const { defaultAttributes, ROLES } =
+  require("../../configs/constants").constants;
 
 const User = sequelize.define(
   "User",
@@ -44,6 +45,10 @@ const User = sequelize.define(
     securityScore: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
+    },
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: ROLES.User,
     },
     accessToken: {
       type: DataTypes.TEXT,

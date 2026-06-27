@@ -24,6 +24,7 @@ const RESPONSE_CODES = {
   Created: 201,
   BadRequest: 400,
   Unauthorized: 401,
+  NotFound: 404,
   ServerError: 500,
 };
 
@@ -33,12 +34,33 @@ const VALIDATION_EVENTS = {
   VerifyUserEmail: "verifyUserEmail",
   SignInUserEmail: "signInUserEmail",
   ForgetPassword: "forgetPassword",
+  RefreshToken: "refreshToken",
+  GetAllUsers: "getAllUsers",
+  GetSingleUserDetails: "getSingleUserDetails",
+  UpdateSingleUser: "updateSingleUser",
+  DeleteSingleUser: "deleteSingleUser",
+  CreateSingleUser: "createSingleUser",
+  CreateCampaign: "createCampaign",
+  GetCampaign: "getCampaign",
+  ListAllCampaigns: "listAllCampaigns",
+  UpdateCampaign: "updateCampaign",
+  DeleteCampaign: "deleteCampaign",
+  CreateCampaignEmail: "createCampaignEmail",
+  GetCampaignEmail: "getCampaignEmail",
+  ListAllCampaignEmails: "listAllCampaignEmails",
+  UpdateCampaignEmail: "updateCampaignEmail",
+  DeleteCampaignEmail: "deleteCampaignEmail",
+  UpdateProfileDetails: "updateProfileDetails",
+  CreateSimulationEvent: "createSimulationEvent",
+  GetAllSimulations: "getAllSimulations",
+  GetAllSimulationEmails: "getAllSimulationEmails",
 };
 
 // JWT Types
 const JWT_TYPE = {
   VerifyEmail: "verifyEmail",
   LoginUser: "loginUser",
+  RefreshToken: "refreshToken",
 };
 
 // JWT Expires
@@ -53,6 +75,7 @@ const EMAIL_EVENTS = {
   LoginUser: "loginUser",
   ForgetPassword: "forgetPassword",
   ResetPassword: "resetPassword",
+  WelcomeUser: "welcomeUser",
 };
 
 // Allowed files types for upload
@@ -82,6 +105,56 @@ const DEPARTMENT = {
   EXECUTIVE: "executive",
 };
 
+// Roles for authentication
+const ROLES = {
+  Admin: "admin",
+  User: "user",
+};
+
+// Status of campaigns
+const CAMPAIGN_STATUS = {
+  Draft: "draft",
+  Active: "active",
+  Completed: "completed",
+  Cancelled: "cancelled",
+};
+
+// Types of emails
+const CAMPAIGN_EMAIL_TYPES = {
+  Phishing: "phishing",
+  Training: "training",
+  Alert: "alert",
+};
+
+// System Generated Email
+const SYSTEM_GENERATED_EMAIL = {
+  System: "system",
+  Ai: "ai",
+  Admin: "admin",
+};
+
+// Events for campaign
+const CAMPAIGN_EVENTS = {
+  LinkClicked: "linkClicked",
+  Reported: "reported",
+  Quit: "quit",
+};
+
+// Scores for user actions
+const SCORES = {
+  PHISHING_CLICK_PENALTY: -15, // Fell for phishing email
+  PHISHING_REPORT_REWARD: +10, // Correctly identified phishing email
+  FALSE_POSITIVE_PENALTY: -5, // Reported a safe email
+  QUIT_PENALTY: -10,
+};
+
+// User Simulation Status
+const USER_SIMULATION_STATUS = {
+  NOT_STARTED: "Not Started",
+  COMPLETED: "completed",
+  IN_PROGRESS: "In Progress",
+};
+
 // Export the constants
 module.exports.constants = {
   defaultAttributes,
@@ -106,5 +179,12 @@ module.exports.constants = {
   FILE_TYPES,
   MOMENT,
   DEPARTMENT,
+  ROLES,
   Op,
+  CAMPAIGN_STATUS,
+  SYSTEM_GENERATED_EMAIL,
+  CAMPAIGN_EMAIL_TYPES,
+  CAMPAIGN_EVENTS,
+  SCORES,
+  USER_SIMULATION_STATUS,
 };
