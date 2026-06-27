@@ -17,6 +17,11 @@ ROUTER.get("/stats", [CheckUserAuth], DashboardController.getDashboardStats)
     "/pending-simulations",
     [CheckUserAuth],
     DashboardController.getPendingSimulations,
+  )
+  .get(
+    "/activity-ledger",
+    [CheckUserAuth],
+    DashboardController.getActivityLedger,
   );
 
 // Export the router

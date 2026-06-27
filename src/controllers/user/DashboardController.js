@@ -324,4 +324,78 @@ module.exports = {
       });
     }
   },
+
+  /**
+   * @name getActivityLedger
+   * @path /user/dashboard/activity-ledger
+   * @method GET
+   * @schema Campaign
+   * @description This method is used to get the activity ledger of the logged in user.
+   * @returns {Object} JSON object containing the activity ledger
+   * @author Deep Panchal
+   */
+  getActivityLedger: async (req, res) => {
+    try {
+      // Build the SQL query
+      let countClause = `SELECT COUNT(*)::INTEGER AS "count"`;
+
+      let selectClause = `
+      SELECT
+        CE."id",
+        C."title",
+        CE."scoreImpact",
+        CE."eventType",
+        CE."createdAt"`;
+
+      let whereClause = ` FROM
+        "campaign_events" CE
+        LEFT JOIN "campaigns" C ON C."id" = CE."campaignId"
+        AND C."isDeleted" = FALSE
+      WHERE
+        CE."userId" = :userId
+        AND CE."isDeleted" = FALSE`;
+
+      let orderByClause = ` ORDER BY
+        "createdAt" DESC
+      LIMIT :limit OFFSET :offset`;
+
+      const selectQuery = `${selectClause} ${whereClause} ${orderByClause}`;
+      const countQuery = `${countClause} ${whereClause}`;
+
+      // Run the sql query using sequelize query.
+      const [getActivityLedger, getCount] = await Promise.all([
+        sequelize.query(selectQuery, {
+          type: sequelize.QueryTypes.SELECT,
+          replacements: {
+            userId: req.user.id,
+            limit: parseInt(req.query.limit, 10) || 5,
+            offset: parseInt(req.query.offset, 10) || 0,
+          },
+        }),
+        sequelize.query(countQuery, {
+          type: sequelize.QueryTypes.SELECT,
+          replacements: {
+            userId: req.user.id,
+          },
+        }),
+      ]);
+
+      // Success Response
+      return res.status(RESPONSE_CODES.Ok).json({
+        status: RESPONSE_CODES.Ok,
+        message: null,
+        data: {
+          data: getActivityLedger,
+          count: getCount[0].count,
+        },
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      return res.status(RESPONSE_CODES.ServerError).json({
+        status: RESPONSE_CODES.ServerError,
+        message: req.__("WENTS_WRONG"),
+        data: null,
+      });
+    }
+  },
 };
