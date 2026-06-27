@@ -148,6 +148,13 @@ const SCORES = {
   QUIT_PENALTY: -10,
 };
 
+// User Simulation Status
+const USER_SIMULATION_STATUS = {
+  NOT_STARTED: "Not Started",
+  COMPLETED: "completed",
+  IN_PROGRESS: "In Progress",
+};
+
 // Export the constants
 module.exports.constants = {
   defaultAttributes,
@@ -179,4 +186,5 @@ module.exports.constants = {
   CAMPAIGN_EMAIL_TYPES,
   CAMPAIGN_EVENTS,
   SCORES,
+  USER_SIMULATION_STATUS,
 };

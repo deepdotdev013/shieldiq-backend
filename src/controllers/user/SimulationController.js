@@ -1,13 +1,9 @@
-const { RESPONSE_CODES, VALIDATION_EVENTS, UUID } =
+const { RESPONSE_CODES, VALIDATION_EVENTS, UUID, USER_SIMULATION_STATUS } =
   require("../../../configs/constants").constants;
 const {
   validateSimulationData,
 } = require("../../validations/SimulationValidation");
-const {
-  sequelize,
-  CampaignEmailMapping,
-  CampaignEvent,
-} = require("../../models");
+const { sequelize, CampaignEvent } = require("../../models");
 const {
   computeScoreImpact,
   applyScoreImpact,
@@ -61,14 +57,21 @@ module.exports = {
                 C."endDate",
                 C."status",
                 C."createdAt",
-                COUNT(CEM."id") AS "emails",
-                COUNT(CEM."id") * 10 AS "points"
+                COUNT(DISTINCT CEM."id") AS "emails",
+                COUNT(DISTINCT CEM."id") * 10 AS "points",
+                CASE
+                  WHEN COUNT(DISTINCT CE."id") = 0 THEN :notStarted
+                  WHEN COUNT(DISTINCT CEM."id") = COUNT(DISTINCT CE."id") THEN :completed
+                  ELSE :inProgress
+                END AS "userSimulationStatus"
             FROM
                 "campaigns" C
                 LEFT JOIN "users" U ON U."department" = C."targetDepartment"
                 AND U."isDeleted" = FALSE
                 LEFT JOIN "campaign_email_mappings" CEM ON CEM."campaignId" = C."id"
                 AND CEM."isDeleted" = FALSE
+                LEFT JOIN "campaign_events" CE ON CE."campaignId" = C."id"
+	              AND CE."isDeleted" = FALSE
             WHERE
                 U."id" = :userId
                 AND C."isDeleted" = FALSE`;
@@ -107,6 +110,9 @@ module.exports = {
         replacements: {
           userId: req.user.id,
           search: `%${queryData.search}%`,
+          notStarted: USER_SIMULATION_STATUS.NOT_STARTED,
+          completed: USER_SIMULATION_STATUS.COMPLETED,
+          inProgress: USER_SIMULATION_STATUS.IN_PROGRESS,
           status: queryData.status,
           limit: queryData.limit,
           offset: queryData.offset,
