@@ -4,6 +4,10 @@ const { User } = require("../models");
 
 // computeScoreImpact computes the impact of user action on the campaign email.
 const computeScoreImpact = async (eventType, isPhishing) => {
+  // If user quits the simulation, apply the quit penalty.
+  if (eventType === CAMPAIGN_EVENTS.Quit) {
+    return SCORES.QUIT_PENALTY;
+  }
   // If user clicks on the phishing link, apply the phishing click penalty.
   if (eventType === CAMPAIGN_EVENTS.LinkClicked && isPhishing) {
     return SCORES.PHISHING_CLICK_PENALTY;

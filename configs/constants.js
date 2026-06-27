@@ -53,7 +53,7 @@ const VALIDATION_EVENTS = {
   UpdateProfileDetails: "updateProfileDetails",
   CreateSimulationEvent: "createSimulationEvent",
   GetAllSimulations: "getAllSimulations",
-  GetAllSimulationEmails: "getAllSimulationEmails"
+  GetAllSimulationEmails: "getAllSimulationEmails",
 };
 
 // JWT Types
@@ -135,10 +135,9 @@ const SYSTEM_GENERATED_EMAIL = {
 
 // Events for campaign
 const CAMPAIGN_EVENTS = {
-  Sent: "sent",
-  Opened: "opened",
   LinkClicked: "linkClicked",
   Reported: "reported",
+  Quit: "quit",
 };
 
 // Scores for user actions
@@ -146,6 +145,7 @@ const SCORES = {
   PHISHING_CLICK_PENALTY: -15, // Fell for phishing email
   PHISHING_REPORT_REWARD: +10, // Correctly identified phishing email
   FALSE_POSITIVE_PENALTY: -5, // Reported a safe email
+  QUIT_PENALTY: -10,
 };
 
 // Export the constants

@@ -248,15 +248,31 @@ module.exports = {
         });
       }
 
-      // Find the simulation exists before making an event for it.
-      const isSimulationExist = await CampaignEmailMapping.findOne({
-        where: {
+      // Query to check for the existing simulation and fetch the isPhishing for scoreEngine.
+      const query = `
+      SELECT
+          CE."isPhishing"
+      FROM
+          "campaign_email_mappings" CEM
+          INNER JOIN "campaign_emails" CE
+              ON CE."id" = CEM."campaignEmailId"
+              AND CE."isDeleted" = FALSE
+      WHERE
+          CEM."campaignId" = :campaignId
+          AND CEM."campaignEmailId" = :campaignEmailId
+          AND CEM."isDeleted" = FALSE
+      LIMIT 1;`;
+
+      // Run the sql query using sequelize query.
+      const simulationData = await sequelize.query(query, {
+        type: sequelize.QueryTypes.SELECT,
+        replacements: {
           campaignId: bodyData.campaignId,
           campaignEmailId: bodyData.campaignEmailId,
-          isDeleted: false,
         },
       });
-      if (!isSimulationExist) {
+
+      if (!simulationData) {
         return res.status(RESPONSE_CODES.NotFound).json({
           status: RESPONSE_CODES.NotFound,
           message: req.__("SIMULATION_NOT_FOUND"),
@@ -284,7 +300,7 @@ module.exports = {
       // Compute the score impact based on the event type and whether the email is phishing.
       const scoreImpact = await computeScoreImpact(
         bodyData.eventType,
-        isSimulationExist.isPhishing,
+        simulationData[0].isPhishing,
       );
 
       let newEvent;
