@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "campaign_events" (
     "id" VARCHAR(36) PRIMARY KEY NOT NULL,
     "campaignId" VARCHAR(36) NOT NULL,
-    "campaignEmailId" VARCHAR(36) NOT NULL,
+    "campaignEmailId" VARCHAR(36) NULL,
     "userId" VARCHAR(36) NOT NULL,
     "eventType" VARCHAR(36) NOT NULL,
     "scoreImpact" INT NOT NULL DEFAULT 0,

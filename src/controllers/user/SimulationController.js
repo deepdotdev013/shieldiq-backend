@@ -1,5 +1,11 @@
-const { RESPONSE_CODES, VALIDATION_EVENTS, UUID, USER_SIMULATION_STATUS } =
-  require("../../../configs/constants").constants;
+const {
+  RESPONSE_CODES,
+  CAMPAIGN_EVENTS,
+  VALIDATION_EVENTS,
+  UUID,
+  USER_SIMULATION_STATUS,
+  Op,
+} = require("../../../configs/constants").constants;
 const {
   validateSimulationData,
 } = require("../../validations/SimulationValidation");
@@ -59,9 +65,22 @@ module.exports = {
                 C."createdAt",
                 COUNT(DISTINCT CEM."id") AS "emails",
                 COUNT(DISTINCT CEM."id") * 10 AS "points",
+                COUNT(
+                  DISTINCT CASE
+                    WHEN CE."eventType" IN (:linkClicked, :reported) THEN CE."campaignEmailId"
+                  END
+                ) AS "completedEvents",
                 CASE
-                  WHEN COUNT(DISTINCT CE."id") = 0 THEN :notStarted
-                  WHEN COUNT(DISTINCT CEM."id") = COUNT(DISTINCT CE."id") THEN :completed
+                  WHEN COUNT(
+                    DISTINCT CASE
+                      WHEN CE."eventType" IN (:linkClicked, :reported) THEN CE."campaignEmailId"
+                    END
+                  ) = 0 THEN :notStarted
+                  WHEN COUNT(DISTINCT CEM."campaignEmailId") = COUNT(
+                    DISTINCT CASE
+                      WHEN CE."eventType" IN (:linkClicked, :reported) THEN CE."campaignEmailId"
+                    END
+                  ) THEN :completed
                   ELSE :inProgress
                 END AS "userSimulationStatus"
             FROM
@@ -113,6 +132,8 @@ module.exports = {
           notStarted: USER_SIMULATION_STATUS.NOT_STARTED,
           completed: USER_SIMULATION_STATUS.COMPLETED,
           inProgress: USER_SIMULATION_STATUS.IN_PROGRESS,
+          linkClicked: CAMPAIGN_EVENTS.LinkClicked,
+          reported: CAMPAIGN_EVENTS.Reported,
           status: queryData.status,
           limit: queryData.limit,
           offset: queryData.offset,
@@ -286,21 +307,29 @@ module.exports = {
         });
       }
 
-      // Check for duplicate event for the same user, campaign, and campaign email.
-      const isDuplicateEvent = await CampaignEvent.findOne({
-        where: {
-          campaignId: bodyData.campaignId,
-          campaignEmailId: bodyData.campaignEmailId,
-          userId: bodyData.userId,
-          isDeleted: false,
-        },
-      });
-      if (isDuplicateEvent) {
-        return res.status(RESPONSE_CODES.BadRequest).json({
-          status: RESPONSE_CODES.BadRequest,
-          message: req.__("DUPLICATE_EVENT"),
-          data: null,
+      // Check if the event is a quit event.
+      const isQuitEvent = bodyData.eventType === CAMPAIGN_EVENTS.Quit;
+
+      // If it is not a quit event, check for duplicate event for the same user, campaign, and campaign email.
+      if (!isQuitEvent) {
+        const isDuplicateEvent = await CampaignEvent.findOne({
+          where: {
+            campaignId: bodyData.campaignId,
+            campaignEmailId: bodyData.campaignEmailId,
+            userId: bodyData.userId,
+            eventType: {
+              [Op.ne]: CAMPAIGN_EVENTS.Quit,
+            },
+            isDeleted: false,
+          },
         });
+        if (isDuplicateEvent) {
+          return res.status(RESPONSE_CODES.BadRequest).json({
+            status: RESPONSE_CODES.BadRequest,
+            message: req.__("DUPLICATE_EVENT"),
+            data: null,
+          });
+        }
       }
 
       // Compute the score impact based on the event type and whether the email is phishing.
@@ -317,7 +346,7 @@ module.exports = {
             {
               id: UUID.v4(),
               campaignId: bodyData.campaignId,
-              campaignEmailId: bodyData.campaignEmailId,
+              campaignEmailId: isQuitEvent ? null : bodyData.campaignEmailId,
               userId: bodyData.userId,
               eventType: bodyData.eventType,
               scoreImpact: scoreImpact,

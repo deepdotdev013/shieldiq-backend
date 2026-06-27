@@ -26,7 +26,7 @@ const CampaignEvent = sequelize.define(
     },
     campaignEmailId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "campaign_emails",
         key: "id",
