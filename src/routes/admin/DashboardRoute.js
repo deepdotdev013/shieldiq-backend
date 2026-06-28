@@ -15,7 +15,8 @@ ROUTER.get(
   "/stats",
   [CheckAdminAuth],
   DashboardController.getDashboardStats,
-).get("/trends", [CheckAdminAuth], DashboardController.getDashboardTrends);
+).get("/trends", [CheckAdminAuth], DashboardController.getDashboardTrends)
+.get("/activity-ledger", [CheckAdminAuth], DashboardController.getActivityLedger);
 
 // Export the router
 module.exports = ROUTER;

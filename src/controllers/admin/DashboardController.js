@@ -32,12 +32,18 @@ module.exports = {
             WHEN U."securityScore" > 80 THEN U."id"
           END
         ) AS "protectedEmployees",
-        COUNT(DISTINCT C."id") AS "totalCampaigns"
+        (
+          SELECT
+            COUNT(*)
+          FROM
+            "campaigns"
+          WHERE
+            "isDeleted" = FALSE
+        ) AS "totalCampaigns"
       FROM
         "users" U
         LEFT JOIN "campaign_events" CEV ON CEV."userId" = U."id"
         AND CEV."isDeleted" = FALSE
-        LEFT JOIN "campaigns" C ON C."isDeleted" = FALSE
       WHERE
         U."isDeleted" = FALSE
         AND U."isActive" = TRUE
@@ -142,6 +148,77 @@ module.exports = {
         status: RESPONSE_CODES.Ok,
         message: req.__("DASHBOARD_TRENDS_FETCHED_SUCCESS"),
         data: trends || [],
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      return res.status(RESPONSE_CODES.ServerError).json({
+        status: RESPONSE_CODES.ServerError,
+        message: req.__("WENTS_WRONG"),
+        data: null,
+      });
+    }
+  },
+
+  /**
+   * @name getActivityLedger
+   * @path /admin/dashboard/activity-ledger
+   * @method GET
+   * @description This method is used to get the activity ledger for all users.
+   * @returns {Object} JSON object containing the activity ledger
+   * @author Deep Panchal
+   */
+  getActivityLedger: async (req, res) => {
+    try {
+      // Build the SQL query
+      let countClause = `SELECT COUNT(*)::INTEGER AS "count"`;
+
+      let selectClause = `
+      SELECT
+        CE."id",
+        C."title",
+        CE."scoreImpact",
+        CE."eventType",
+        CE."createdAt",
+        U."fullName",
+        U."email"`;
+
+      let whereClause = ` FROM
+        "campaign_events" CE
+        LEFT JOIN "campaigns" C ON C."id" = CE."campaignId"
+        AND C."isDeleted" = FALSE
+        LEFT JOIN "users" U ON U."id" = CE."userId"
+      WHERE
+        CE."isDeleted" = FALSE`;
+
+      let orderByClause = ` ORDER BY
+        CE."createdAt" DESC
+      LIMIT :limit OFFSET :offset`;
+
+      const selectQuery = `${selectClause} ${whereClause} ${orderByClause}`;
+      const countQuery = `${countClause} ${whereClause}`;
+
+      // Run the sql query using sequelize query.
+      const [getActivityLedger, getCount] = await Promise.all([
+        sequelize.query(selectQuery, {
+          type: sequelize.QueryTypes.SELECT,
+          replacements: {
+            limit: parseInt(req.query.limit, 10) || 5,
+            offset: parseInt(req.query.offset, 10) || 0,
+          },
+        }),
+        sequelize.query(countQuery, {
+          type: sequelize.QueryTypes.SELECT,
+        }),
+      ]);
+
+      // Success Response
+      return res.status(RESPONSE_CODES.Ok).json({
+        status: RESPONSE_CODES.Ok,
+        message: null,
+        data: {
+          data: getActivityLedger,
+          count: getCount[0].count,
+        },
       });
     } catch (error) {
       console.log("error: ", error);

@@ -93,7 +93,9 @@ module.exports = {
 	              AND CE."isDeleted" = FALSE
             WHERE
                 U."id" = :userId
-                AND C."isDeleted" = FALSE`;
+                AND C."isDeleted" = FALSE
+                AND C."startDate" <= CURRENT_DATE
+	              AND C."endDate" >= CURRENT_DATE`;
 
       // If search is coming, search the input on the campaign's title and description.
       if (queryData.search) {
@@ -278,12 +280,16 @@ module.exports = {
       // Query to check for the existing simulation and fetch the isPhishing for scoreEngine.
       const query = `
       SELECT
-          CE."isPhishing"
+          CE."isPhishing",
+          C."startDate",
+	        C."endDate"
       FROM
           "campaign_email_mappings" CEM
           INNER JOIN "campaign_emails" CE
               ON CE."id" = CEM."campaignEmailId"
               AND CE."isDeleted" = FALSE
+          LEFT JOIN "campaigns" C ON CEM."campaignId" = C."id"
+          AND C."isDeleted" = FALSE
       WHERE
           CEM."campaignId" = :campaignId
           AND CEM."campaignEmailId" = :campaignEmailId
@@ -303,6 +309,21 @@ module.exports = {
         return res.status(RESPONSE_CODES.NotFound).json({
           status: RESPONSE_CODES.NotFound,
           message: req.__("SIMULATION_NOT_FOUND"),
+          data: null,
+        });
+      }
+
+      // Check if the duration of the simulation is over and prevent events on it.
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (
+        new Date(simulationData[0].startDate) > today ||
+        new Date(simulationData[0].endDate) < today
+      ) {
+        return res.status(RESPONSE_CODES.BadRequest).json({
+          status: RESPONSE_CODES.BadRequest,
+          message: req.__("CANNOT_INTERACT_WITH_INACTIVE_SIMULATION"),
           data: null,
         });
       }
