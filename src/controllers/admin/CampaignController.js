@@ -1,8 +1,14 @@
 const {
   validateCampaignData,
 } = require("../../validations/CampaignValidation");
-const { UUID, VALIDATION_EVENTS, RESPONSE_CODES, CAMPAIGN_STATUS } =
-  require("../../../configs/constants").constants;
+const {
+  UUID,
+  VALIDATION_EVENTS,
+  RESPONSE_CODES,
+  CAMPAIGN_STATUS,
+  CAMPAIGN_EVENTS,
+  ROLES,
+} = require("../../../configs/constants").constants;
 const {
   sequelize,
   Campaign,
@@ -288,11 +294,24 @@ module.exports = {
         C."targetDepartment",
         C."emailType",
         C."status",
-        C."createdAt"`;
+        C."createdAt",
+        COUNT(
+          CASE
+            WHEN CE."eventType" = :linkClicked THEN 1
+          END
+        ) AS "totalClicks",
+        COUNT(
+          CASE
+            WHEN CE."eventType" = :reported THEN 1
+          END
+        ) AS "totalReports"`;
 
       let whereClause = ` FROM
         "campaigns" C
-      WHERE
+        LEFT JOIN "campaign_events" CE 
+      	  ON CE."campaignId" = C."id"
+      	  AND CE."isDeleted" = FALSE
+        WHERE
         C."isDeleted" = FALSE`;
 
       // Apply conditions on the query.
@@ -314,13 +333,15 @@ module.exports = {
 
       // Build the queries
       const countQuery = `${allCampaignsQueryCount} ${whereClause}`;
-      const selectQuery = `${allCampaignsQuery} ${whereClause} ORDER BY C."${sortBy}" ${sortOrder} LIMIT :limit OFFSET :offset`;
+      const selectQuery = `${allCampaignsQuery} ${whereClause} GROUP BY C."id" ORDER BY C."${sortBy}" ${sortOrder} LIMIT :limit OFFSET :offset`;
 
       const [getAllCampaignsDetails, getAllCampaignsCount] = await Promise.all([
         sequelize.query(selectQuery, {
           type: sequelize.QueryTypes.SELECT,
           replacements: {
             search: `%${queryData?.search || ""}%`,
+            linkClicked: CAMPAIGN_EVENTS.LinkClicked,
+            reported: CAMPAIGN_EVENTS.Reported,
             limit: queryData?.limit,
             offset: queryData?.skip,
           },
@@ -611,5 +632,88 @@ module.exports = {
     }
   },
 
+  /**
+   * @name fetchCampaignStats
+   * @path /admin/campaigns/stats
+   * @method GET
+   * @schema Campaign
+   * @description This method is used to get the statistics of all the campaigns for all the users.
+   * @returns {Object} JSON object containing the campaign data
+   * @author Deep Panchal
+   */
+  fetchCampaignStats: async (req, res) => {
+    try {
+      const allCampaignsQuery = `
+      WITH
+        USER_STATS AS (
+          SELECT
+            U."id",
+            COUNT(
+              CASE
+                WHEN CE."eventType" = :linkClicked THEN 1
+              END
+            ) AS "clicks",
+            COUNT(
+              CASE
+                WHEN CE."eventType" = :reported THEN 1
+              END
+            ) AS "reports"
+          FROM
+            "users" U
+            LEFT JOIN "campaign_events" CE ON CE."userId" = U."id"
+            AND CE."isDeleted" = FALSE
+          WHERE
+            U."isDeleted" = FALSE
+            AND U."isActive" = TRUE
+            AND U."role" != :admin
+          GROUP BY
+            U."id"
+        )
+      SELECT
+        ROUND(
+          AVG(
+            CASE
+              WHEN ("clicks" + "reports") = 0 THEN 0
+              ELSE ("clicks" * 100.0) / ("clicks" + "reports")
+            END
+          ),
+          1
+        ) AS "averageClickRate",
+        ROUND(
+          AVG(
+            CASE
+              WHEN ("clicks" + "reports") = 0 THEN 0
+              ELSE ("reports" * 100.0) / ("clicks" + "reports")
+            END
+          ),
+          1
+        ) AS "averageReportRate"
+      FROM
+        USER_STATS;`;
 
+      // Execute the query to fetch the campaign stats
+      const getCampaignStats = await sequelize.query(allCampaignsQuery, {
+        type: sequelize.QueryTypes.SELECT,
+        replacements: {
+          admin: ROLES.Admin,
+          linkClicked: CAMPAIGN_EVENTS.LinkClicked,
+          reported: CAMPAIGN_EVENTS.Reported,
+        },
+      });
+
+      // Return the campaigns
+      return res.status(RESPONSE_CODES.Ok).json({
+        status: RESPONSE_CODES.Ok,
+        message: null,
+        data: getCampaignStats[0] || {},
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      return res.status(RESPONSE_CODES.ServerError).json({
+        status: RESPONSE_CODES.ServerError,
+        message: req.__("WENTS_WRONG"),
+        data: null,
+      });
+    }
+  },
 };
