@@ -314,12 +314,10 @@ module.exports = {
       }
 
       // Check if the duration of the simulation is over and prevent events on it.
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
+      const today = Date.now();
       if (
-        new Date(simulationData[0].startDate) > today ||
-        new Date(simulationData[0].endDate) < today
+        new Date(simulationData[0].startDate) >= today ||
+        new Date(simulationData[0].endDate) <= today
       ) {
         return res.status(RESPONSE_CODES.BadRequest).json({
           status: RESPONSE_CODES.BadRequest,

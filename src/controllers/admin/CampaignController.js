@@ -162,60 +162,83 @@ module.exports = {
       }
 
       let campaignDetailsQuery = `
+      WITH "EmailAgg" AS (
+          SELECT
+              CEM."campaignId",
+              JSONB_AGG(
+                  JSONB_BUILD_OBJECT(
+                      'id',        CE."id",
+                      'sender',    CE."sender",
+                      'fromEmail', CE."fromEmail",
+                      'subject',   CE."subject",
+                      'body',      CE."body",
+                      'linkText',  CE."linkText",
+                      'createdAt', CE."createdAt"
+                  )
+                  ORDER BY CE."createdAt" ASC
+              ) FILTER (WHERE CE."id" IS NOT NULL) AS "campaignEmails"
+          FROM
+              "campaign_email_mappings" CEM
+              LEFT JOIN "campaign_emails" CE ON CE."id" = CEM."campaignEmailId"
+                  AND CE."isDeleted" = FALSE
+          WHERE
+              CEM."isDeleted" = FALSE
+          GROUP BY
+              CEM."campaignId"
+      )
       SELECT
-        C."id",
-        C."title",
-        C."description",
-        C."startDate",
-        C."endDate",
-        C."targetDepartment",
-	      C."emailType",
-	      C."status",
-	      C."createdAt",
-        CASE
-            WHEN CEM."campaignId" IS NULL THEN NULL
-            ELSE COALESCE(
-                JSONB_AGG(
-                    JSONB_BUILD_OBJECT(
-                        'id', CE."id",
-                        'sender', CE."sender",
-                        'fromEmail', CE."fromEmail",
-                        'subject', CE."subject",
-                        'body', CE."body",
-                        'linkText', CE."linkText",
-                        'createdAt', CE."createdAt"
-                    )
-                    ORDER BY CE."createdAt" ASC
-                ) FILTER (WHERE CE."id" IS NOT NULL),
-                '[]'::jsonb
-            )
-        END AS "campaignEmails"
+          C."id",
+          C."title",
+          C."description",
+          C."startDate",
+          C."endDate",
+          C."targetDepartment",
+          C."emailType",
+          C."status",
+          C."createdAt",
+          COUNT(DISTINCT CEV."userId") AS "usersInteracted",
+          COUNT(
+              DISTINCT CASE
+                  WHEN CEV."eventType" = :linkClicked THEN CEV."id"
+              END
+          ) AS "totalClicks",
+          COUNT(
+              DISTINCT CASE
+                  WHEN CEV."eventType" = :reported THEN CEV."id"
+              END
+          ) AS "totalReports",
+          CASE
+              WHEN EA."campaignId" IS NULL THEN NULL
+              ELSE COALESCE(EA."campaignEmails", '[]'::JSONB)
+          END AS "campaignEmails"
       FROM
-	      "campaigns" C
-	    LEFT JOIN "campaign_email_mappings" CEM ON CEM."campaignId" = C."id"
-	      AND CEM."isDeleted" = FALSE
-	    LEFT JOIN "campaign_emails" CE ON CE."id" = CEM."campaignEmailId"
-	      AND CE."isDeleted" = FALSE
+          "campaigns" C
+          LEFT JOIN "EmailAgg" EA ON EA."campaignId" = C."id"
+          LEFT JOIN "campaign_events" CEV ON CEV."campaignId" = C."id"
+              AND CEV."isDeleted" = FALSE
       WHERE
-	      C."isDeleted" = FALSE
-	      AND C."id" =:campaignId
+          C."isDeleted" = FALSE
+          AND C."id" = :campaignId
       GROUP BY
-	      C."id",
-	      C."title",
-	      C."description",
-	      C."startDate",
-	      C."endDate",
-	      C."targetDepartment",
-	      C."emailType",
-	      C."status",
-	      C."createdAt",
-        CEM."campaignId";`;
+          C."id",
+          C."title",
+          C."description",
+          C."startDate",
+          C."endDate",
+          C."targetDepartment",
+          C."emailType",
+          C."status",
+          C."createdAt",
+          EA."campaignId",
+          EA."campaignEmails"`;
 
       // Execute the query
       const campaign = await sequelize.query(campaignDetailsQuery, {
         type: sequelize.QueryTypes.SELECT,
         replacements: {
           campaignId: queryData?.campaignId,
+          linkClicked: CAMPAIGN_EVENTS.LinkClicked,
+          reported: CAMPAIGN_EVENTS.Reported,
         },
       });
 

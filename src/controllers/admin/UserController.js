@@ -6,6 +6,7 @@ const {
   UUID,
   BCRYPT,
   EMAIL_EVENTS,
+  CAMPAIGN_EVENTS,
 } = require("../../../configs/constants").constants;
 const { generateRandomPassword } = require("../../utils/generatePassword");
 const { validateUserData } = require("../../validations/UserValidation");
@@ -197,15 +198,29 @@ module.exports = {
             M."mediaUrl"
           )
         END AS "profilePhoto",
-        U."createdAt"
+        U."createdAt",
+        COUNT(
+          DISTINCT CASE
+            WHEN CE."eventType" = :linkClicked THEN CE."id"
+          END
+        ) AS "totalClicks",
+        COUNT(
+          DISTINCT CASE
+            WHEN CE."eventType" = :reported THEN CE."id"
+          END
+        ) AS "totalReports"
       FROM
         "users" U
         LEFT JOIN "media" M ON U."profilePhotoId" = M."id"
         AND M."isDeleted" = FALSE
+        LEFT JOIN "campaign_events" CE ON CE."userId" = U."id" AND CE."isDeleted" = FALSE
       WHERE
         U."role" != :role
         AND U."isDeleted" = FALSE
-        AND U."id" = :userId`;
+        AND U."id" = :userId
+      GROUP BY
+        U."id",
+        M."mediaUrl"`;
 
       // Run the sql query using sequelize query.
       const getSingleUserDetails = await sequelize.query(
@@ -215,6 +230,8 @@ module.exports = {
           replacements: {
             userId: queryData?.userId,
             role: ROLES.Admin,
+            linkClicked: CAMPAIGN_EVENTS.LinkClicked,
+            reported: CAMPAIGN_EVENTS.Reported,
           },
         },
       );

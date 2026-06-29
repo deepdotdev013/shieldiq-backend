@@ -12,26 +12,26 @@ const calculateRate = (clicks, reports) => {
 };
 
 // calculateTrend function will calculate the trend
-const calculateTrend = (current, previous) => {
+const calculateScoreTrend = (current, previous) => {
   current = Number(current || 0);
   previous = Number(previous || 0);
 
   if (previous === 0) {
     return {
-      value: 0,
-      direction: "neutral",
+      value: current > 0 ? 100 : 0,
+      direction: current > 0 ? "up" : "neutral",
     };
   }
 
-  const diff = Number((((current - previous) / previous) * 100).toFixed(1));
+  const diff = current - previous;
 
   return {
-    value: Math.abs(diff),
+    value: Number(Math.abs(diff).toFixed(1)),
     direction: diff > 0 ? "up" : diff < 0 ? "down" : "neutral",
   };
 };
 
 module.exports = {
   calculateRate,
-  calculateTrend,
+  calculateScoreTrend,
 };

@@ -3,7 +3,7 @@ const { CAMPAIGN_EVENTS, RESPONSE_CODES, USER_SIMULATION_STATUS } =
 const { sequelize } = require("../../models");
 const {
   calculateRate,
-  calculateTrend,
+  calculateScoreTrend,
 } = require("../../utils/calculateDashboardStats");
 
 module.exports = {
@@ -137,17 +137,17 @@ module.exports = {
       );
 
       // Trends
-      const securityScoreTrend = calculateTrend(
+      const securityScoreTrend = calculateScoreTrend(
         dashboardStats[0].currentWeekScore,
         dashboardStats[0].previousWeekScore,
       );
 
-      const clickRateTrend = calculateTrend(
+      const clickRateTrend = calculateScoreTrend(
         currentWeek.clickRate,
         previousWeek.clickRate,
       );
 
-      const reportRateTrend = calculateTrend(
+      const reportRateTrend = calculateScoreTrend(
         currentWeek.reportRate,
         previousWeek.reportRate,
       );
