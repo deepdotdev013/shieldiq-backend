@@ -60,11 +60,11 @@ const generateDefaultTemplates = async () => {
         {
           id: UUID.v4(),
           sender: "IT Helpdesk",
-          fromEmail: "support@internal-it-helpdesk.com",
-          subject: "Security Alert: New VPN Login from Unknown Location",
-          body: '<p>Security Alert,</p><p>A new login was detected on your VPN account from IP 192.168.42.19 (Moscow, RU). If this was not you, please secure your account immediately.</p><p><a href="{{link}}">Report Login Activity</a></p>',
-          linkText: "Report Activity",
-          isPhishing: true,
+          fromEmail: "support@yourcompany.com",
+          subject: "Scheduled Maintenance: VPN Service Downtime This Weekend",
+          body: "<p>Hi Team,</p><p>Please note that the VPN service will undergo scheduled maintenance this Saturday from 10 PM to 2 AM. During this window, remote access may be intermittent. No action is required on your part.</p><p>If you experience issues after the maintenance window, please raise a ticket through the internal helpdesk portal.</p>",
+          linkText: null,
+          isPhishing: false,
           isCreatedByAdmin: false,
           createdBy: SYSTEM_GENERATED_EMAIL.System,
           createdAt: Date.now(),
@@ -72,19 +72,18 @@ const generateDefaultTemplates = async () => {
         },
         {
           id: UUID.v4(),
-          sender: "Secure Alert Service",
-          fromEmail: "alerts@secure-bank-login.com",
-          subject: "URGENT: Verify your online banking credentials",
-          body: '<p>Dear Customer,</p><p>We detected unauthorized access attempts on your online bank portal. To prevent temporary account suspension, verify your identity immediately.</p><p><a href="{{link}}">Verify Bank Account Now</a></p>',
-          linkText: "Verify Identity",
-          isPhishing: true,
+          sender: "People Operations",
+          fromEmail: "people-ops@yourcompany.com",
+          subject: "Reminder: Submit Your Quarterly Timesheet by Friday",
+          body: "<p>Hi all,</p><p>This is a friendly reminder to submit your timesheet for this quarter by end of day Friday. You can do this directly through the HR portal you already use to log in each day.</p><p>Thanks for your cooperation!</p>",
+          linkText: null,
+          isPhishing: false,
           isCreatedByAdmin: false,
           createdBy: SYSTEM_GENERATED_EMAIL.System,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
       ];
-
       // bulk create default templates
       await CampaignEmail.bulkCreate(defaultTemplates);
       console.log("Default email templates seeded successfully! ✅");
