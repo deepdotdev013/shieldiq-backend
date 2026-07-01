@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS "simulation_result_analysis" (
     "createdBy" VARCHAR(36) NULL,
     "updatedAt" BIGINT NOT NULL DEFAULT 0,
     "updatedBy" VARCHAR(36) NULL,
-    "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE,
-
-    CREATE INDEX IF NOT EXISTS "idx_simulation_result_analysis_id" ON "simulation_result_analysis" ("id"),
+    "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+CREATE INDEX IF NOT EXISTS "idx_simulation_result_analysis_id" ON "simulation_result_analysis" ("id");
 
 ALTER TABLE "simulation_result_analysis" ADD CONSTRAINT "fk_simulation_results_simulationResultId" FOREIGN KEY ("simulationResultId") REFERENCES "simulation_results"("id") ON DELETE CASCADE;

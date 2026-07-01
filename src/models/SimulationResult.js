@@ -34,7 +34,7 @@ const SimulationResult = sequelize.define(
     },
   },
   {
-    tableName: "simulation_result",
+    tableName: "simulation_results",
     timestamps: false,
   },
 );

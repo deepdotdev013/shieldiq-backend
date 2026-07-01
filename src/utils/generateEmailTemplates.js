@@ -1,6 +1,14 @@
-const { CampaignEmail } = require("../models");
+const {
+  CampaignEmail,
+  SimulationResult,
+  SimulationResultAnalysis,
+} = require("../models");
 const { UUID, SYSTEM_GENERATED_EMAIL } =
   require("../../configs/constants").constants;
+const {
+  generateSystemSimulationResult,
+  generateSystemSimulationAnalysis,
+} = require("../utils/generateEmailResults");
 
 // generateDefaultTemplates async function for seeding default templates.
 const generateDefaultTemplates = async () => {
@@ -86,6 +94,55 @@ const generateDefaultTemplates = async () => {
       ];
       // bulk create default templates
       await CampaignEmail.bulkCreate(defaultTemplates);
+
+      // generate simulation results and analysis.
+      const simulationResults = [];
+      const simulationResultAnalysis = [];
+
+      // loop through all the templates and generate simulation results and analysis.
+      for (const template of defaultTemplates) {
+        // generate simulation results.
+        const result = generateSystemSimulationResult(template);
+
+        // loop through all the results and generate simulation results.
+        result.forEach((result) => {
+          const simulationResultId = UUID.v4();
+
+          simulationResults.push({
+            id: simulationResultId,
+            campaignEmailId: template.id,
+            eventType: result.eventType,
+            lesson: result.lesson,
+            createdBy: SYSTEM_GENERATED_EMAIL.System,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+
+          // generate simulation analysis.
+          const analysis = generateSystemSimulationAnalysis(
+            template,
+            result.eventType,
+          );
+
+          // loop through all the analysis and generate simulation analysis.
+          analysis.forEach((item) => {
+            simulationResultAnalysis.push({
+              id: UUID.v4(),
+              simulationResultId,
+              redFlag: item.redFlag,
+              explanation: item.explanation,
+              displayOrder: item.displayOrder,
+              createdBy: SYSTEM_GENERATED_EMAIL.System,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            });
+          });
+        });
+      }
+
+      // Bulk Create the simulation results and analaysis
+      await SimulationResult.bulkCreate(simulationResults);
+      await SimulationResultAnalysis.bulkCreate(simulationResultAnalysis);
       console.log("Default email templates seeded successfully! ✅");
     }
   } catch (error) {

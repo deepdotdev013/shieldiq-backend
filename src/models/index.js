@@ -5,6 +5,8 @@ const Campaign = require("./Campaign");
 const CampaignEmail = require("./CampaignEmail");
 const CampaignEmailMapping = require("./CampaignEmailMapping");
 const CampaignEvent = require("./CampaignEvent");
+const SimulationResult = require("./SimulationResult");
+const SimulationResultAnalysis = require("./SimulationResultAnalysis");
 
 module.exports = {
   sequelize,
@@ -13,5 +15,7 @@ module.exports = {
   Campaign,
   CampaignEmail,
   CampaignEmailMapping,
-  CampaignEvent
+  CampaignEvent,
+  SimulationResult,
+  SimulationResultAnalysis,
 };

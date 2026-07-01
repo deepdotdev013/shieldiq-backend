@@ -20,7 +20,7 @@ const SimulationResultAnalysis = sequelize.define(
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "simulation_result",
+        model: "simulation_results",
         key: "id",
       },
     },
@@ -28,7 +28,7 @@ const SimulationResultAnalysis = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    explaination: {
+    explanation: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
